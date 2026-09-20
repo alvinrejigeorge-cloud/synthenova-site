@@ -1,0 +1,16 @@
+{
+  "name": "synthenova-site",
+  "version": "1.0.0",
+  "description": "SYNTHENOVA official website and admin backend",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0"
+  }
+}

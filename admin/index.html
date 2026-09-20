@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SYNTHENOVA ADMIN</title>
+
+    <link
+        rel="stylesheet"
+        href="./admin.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         LOGIN
+    ====================================================== -->
+
+    <section
+        id="loginScreen"
+        class="login-screen"
+    >
+
+        <div class="login-card">
+
+            <div class="login-logo">
+                S
+            </div>
+
+            <div class="eyebrow">
+                SYNTHENOVA / ADMIN
+            </div>
+
+            <h1>
+                ADMIN
+                <span>ACCESS</span>
+            </h1>
+
+            <p class="login-description">
+                Sign in to manage the SYNTHENOVA website.
+            </p>
+
+            <form id="loginForm">
+
+                <label for="loginEmail">
+                    EMAIL
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Enter admin email"
+                    autocomplete="email"
+                    required
+                >
+
+                <label for="loginPassword">
+                    PASSWORD
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                    id="loginButton"
+                >
+                    SIGN IN
+                </button>
+
+                <p
+                    id="loginMessage"
+                    class="message"
+                ></p>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADMIN APPLICATION
+    ====================================================== -->
+
+    <section
+        id="adminApp"
+        class="admin-app hidden"
+    >
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div class="brand">
+
+                <div class="brand-symbol">
+                    S
+                </div>
+
+                <div class="brand-text">
+
+                    <strong>
+                        SYNTHENOVA
+                    </strong>
+
+                    <small>
+                        ADMIN PANEL
+                    </small>
+
+                </div>
+
+            </div>
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
+                LOGOUT
+            </button>
+
+        </header>
+
+
+        <!-- MOBILE NAV -->
+
+        <nav class="mobile-nav">
+
+            <button
+                class="nav-button active"
+                data-section="dashboard"
+                type="button"
+            >
+                <span>⌂</span>
+                Dashboard
+            </button>
+
+            <button
+                class="nav-button"
+                data-section="team"
+                type="button"
+            >
+                <span>◉</span>
+                Team
+            </button>
+
+            <button
+                class="nav-button"
+                data-section="events"
+                type="button"
+            >
+                <span>◆</span>
+                Events
+            </button>
+
+            <button
+                class="nav-button"
+                data-section="gallery"
+                type="button"
+            >
+                <span>▣</span>
+                Gallery
+            </button>
+
+        </nav>
+
+
+        <div class="admin-layout">
+
+            <!-- SIDEBAR -->
+
+            <aside class="sidebar">
+
+                <div class="sidebar-title">
+                    CONTROL
+                </div>
+
+                <button
+                    class="sidebar-button active"
+                    data-section="dashboard"
+                    type="button"
+                >
+                    <span>⌂</span>
+                    Dashboard
+                </button>
+
+                <button
+                    class="sidebar-button"
+                    data-section="team"
+                    type="button"
+                >
+                    <span>◉</span>
+                    Team
+                </button>
+
+                <button
+                    class="sidebar-button"
+                    data-section="events"
+                    type="button"
+                >
+                    <span>◆</span>
+                    Events
+                </button>
+
+                <button
+                    class="sidebar-button"
+                    data-section="gallery"
+                    type="button"
+                >
+                    <span>▣</span>
+                    Gallery
+                </button>
+
+            </aside>
+
+
+            <!-- MAIN CONTENT -->
+
+            <main class="main-content">
+
+
+                <!-- =================================================
+                     DASHBOARD
+                ================================================== -->
+
+                <section
+                    id="dashboardSection"
+                    class="content-section active"
+                >
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                CONTROL CENTER
+                            </span>
+
+                            <h2>
+                                Dashboard
+                            </h2>
+
+                            <p>
+                                Manage your SYNTHENOVA website.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stats-grid">
+
+                        <div class="stat-card">
+
+                            <span>
+                                TEAM
+                            </span>
+
+                            <strong id="teamCount">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <span>
+                                EVENTS
+                            </span>
+
+                            <strong id="eventCount">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="stat-card">
+
+                            <span>
+                                GALLERY
+                            </span>
+
+                            <strong id="galleryCount">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="welcome-card">
+
+                        <div>
+
+                            <span class="section-label">
+                                SYSTEM
+                            </span>
+
+                            <h3>
+                                SYNTHENOVA is online.
+                            </h3>
+
+                            <p>
+                                Your admin panel is connected to Supabase.
+                            </p>
+
+                        </div>
+
+                        <div class="online-dot">
+                            ONLINE
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     TEAM
+                ================================================== -->
+
+                <section
+                    id="teamSection"
+                    class="content-section"
+                >
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                PEOPLE
+                            </span>
+
+                            <h2>
+                                Team
+                            </h2>
+
+                            <p>
+                                Manage SYNTHENOVA team members.
+                            </p>
+
+                        </div>
+
+                        <button
+                            id="addTeamButton"
+                            class="primary-button"
+                            type="button"
+                        >
+                            + ADD MEMBER
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="teamMessage"
+                        class="message"
+                    ></div>
+
+
+                    <div
+                        id="teamGrid"
+                        class="team-admin-grid"
+                    >
+
+                        <div class="loading">
+                            Loading team...
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     EVENTS
+                ================================================== -->
+
+                <section
+                    id="eventsSection"
+                    class="content-section"
+                >
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                PROGRAMS
+                            </span>
+
+                            <h2>
+                                Events
+                            </h2>
+
+                            <p>
+                                Event management.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="coming-card">
+
+                        <span>
+                            01
+                        </span>
+
+                        <h3>
+                            EVENT MANAGEMENT
+                        </h3>
+
+                        <p>
+                            Events management will be connected next.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     GALLERY
+                ================================================== -->
+
+                <section
+                    id="gallerySection"
+                    class="content-section"
+                >
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="section-label">
+                                MEDIA
+                            </span>
+
+                            <h2>
+                                Gallery
+                            </h2>
+
+                            <p>
+                                Gallery management.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="coming-card">
+
+                        <span>
+                            02
+                        </span>
+
+                        <h3>
+                            GALLERY MANAGEMENT
+                        </h3>
+
+                        <p>
+                            Gallery management will be connected next.
+                        </p>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TEAM MODAL
+    ====================================================== -->
+
+    <div
+        id="teamModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <span class="section-label">
+                        TEAM
+                    </span>
+
+                    <h2 id="teamModalTitle">
+                        Add Member
+                    </h2>
+
+                </div>
+
+                <button
+                    id="closeTeamModal"
+                    class="close-button"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="teamForm">
+
+                <input
+                    type="hidden"
+                    id="teamId"
+                >
+
+
+                <!-- PHOTO -->
+
+                <div class="photo-upload">
+
+                    <div
+                        id="photoPreview"
+                        class="photo-preview"
+                    >
+                        <span>
+                            PHOTO
+                        </span>
+                    </div>
+
+
+                    <div class="photo-controls">
+
+                        <label
+                            for="teamPhoto"
+                            class="upload-button"
+                        >
+                            CHOOSE PHOTO
+                        </label>
+
+                        <input
+                            type="file"
+                            id="teamPhoto"
+                            accept="image/jpeg,image/png,image/webp,image/jpg"
+                            hidden
+                        >
+
+                        <small>
+                            JPG / PNG / WEBP — MAX 8 MB
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- NAME -->
+
+                <label for="teamName">
+                    NAME
+                </label>
+
+                <input
+                    type="text"
+                    id="teamName"
+                    placeholder="Member name"
+                    required
+                >
+
+
+                <!-- POSITION -->
+
+                <label for="teamPosition">
+                    POSITION
+                </label>
+
+                <input
+                    type="text"
+                    id="teamPosition"
+                    placeholder="Chairman / Secretary / etc."
+                    required
+                >
+
+
+                <!-- CLASS -->
+
+                <label for="teamClass">
+                    CLASS
+                </label>
+
+                <input
+                    type="text"
+                    id="teamClass"
+                    placeholder="S5 EC"
+                >
+
+
+                <!-- CATEGORY -->
+
+                <label for="teamCategory">
+                    CATEGORY
+                </label>
+
+                <select id="teamCategory">
+
+                    <option value="leadership">
+                        Leadership
+                    </option>
+
+                    <option value="secretariat">
+                        Secretariat
+                    </option>
+
+                    <option value="media">
+                        Media
+                    </option>
+
+                    <option value="pitching">
+                        Pitching
+                    </option>
+
+                    <option value="design">
+                        Design
+                    </option>
+
+                    <option value="general">
+                        General
+                    </option>
+
+                </select>
+
+
+                <!-- ORDER -->
+
+                <label for="teamOrder">
+                    DISPLAY ORDER
+                </label>
+
+                <input
+                    type="number"
+                    id="teamOrder"
+                    value="0"
+                    min="0"
+                    step="1"
+                >
+
+
+                <!-- ACTIVE -->
+
+                <label class="checkbox-label">
+
+                    <input
+                        type="checkbox"
+                        id="teamActive"
+                        checked
+                    >
+
+                    <span>
+                        Show this member on website
+                    </span>
+
+                </label>
+
+
+                <!-- ACTIONS -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        id="cancelTeamButton"
+                        class="secondary-button"
+                    >
+                        CANCEL
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="saveTeamButton"
+                        class="primary-button"
+                    >
+                        SAVE MEMBER
+                    </button>
+
+                </div>
+
+
+                <p
+                    id="teamFormMessage"
+                    class="message"
+                ></p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="./admin.js"></script>
+
+</body>
+
+</html>
