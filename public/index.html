@@ -698,110 +698,12 @@
 
 
             <div
-                id="eventsContainer"
+                id="publicEventsGrid"
                 class="events-layout"
             >
-
-                <article class="event-main-card">
-
-                    <div class="event-card-top">
-
-                        <span>
-                            SYNTHENOVA
-                        </span>
-
-                        <span>
-                            001
-                        </span>
-
-                    </div>
-
-
-                    <div class="event-main-content">
-
-                        <span class="event-tag">
-                            UPCOMING
-                        </span>
-
-                        <h3>
-                            EVENTS
-                            <br>
-                            COMING
-                            <br>
-                            SOON.
-                        </h3>
-
-                        <p>
-
-                            New workshops, technology
-                            sessions and community
-                            activities will appear here.
-
-                        </p>
-
-                    </div>
-
-
-                    <div class="event-card-bottom">
-
-                        <span>
-                            STAY CONNECTED
-                        </span>
-
-                        <span>
-                            →
-                        </span>
-
-                    </div>
-
-                </article>
-
-
-                <div class="event-side-cards">
-
-                    <article class="event-card">
-
-                        <span>
-                            EVENT 01
-                        </span>
-
-                        <h3>
-                            WORKSHOPS
-                        </h3>
-
-                        <p>
-                            Learn something new.
-                        </p>
-
-                        <strong>
-                            SOON →
-                        </strong>
-
-                    </article>
-
-
-                    <article class="event-card dark">
-
-                        <span>
-                            EVENT 02
-                        </span>
-
-                        <h3>
-                            COMMUNITY
-                        </h3>
-
-                        <p>
-                            Connect and collaborate.
-                        </p>
-
-                        <strong>
-                            SOON →
-                        </strong>
-
-                    </article>
-
+                <div class="events-loading">
+                    LOADING EVENTS...
                 </div>
-
             </div>
 
         </section>
@@ -811,7 +713,6 @@
      TEAM
 ====================================================== -->
 
-<section
 <section id="team" class="team-section">
 
     <div class="section-header">
@@ -887,7 +788,6 @@
     </div>
 
 </div>
-</section>       
  <!-- =================================================
              GALLERY
         ================================================== -->
@@ -1884,7 +1784,18 @@
                 type="date"
                 required
             >
-
+<div class="admin-form-group">
+    <label for="adminEventRegistration">Google Form Registration Link</label>
+    <input
+        type="url"
+        id="adminEventRegistration"
+        placeholder="https://forms.gle/ABC123xyz"
+        autocomplete="url"
+    >
+    <small>
+        Paste the Google Form link. It will be connected to the public REGISTER NOW button.
+    </small>
+</div>
 
             <label>
                 DESCRIPTION
@@ -1979,8 +1890,8 @@
             SYNTHENOVA / GALLERY
         </span>
 
-        <h3>
-            ADD IMAGE
+        <h3 id="galleryModalTitle">
+            ADD GALLERY IMAGES
         </h3>
 
 
@@ -1994,8 +1905,12 @@
                 id="adminGalleryImage"
                 type="file"
                 accept="image/*"
-                required
+                multiple
             >
+
+            <small class="admin-form-help">
+                You can select multiple images at once. Each image will be added to the gallery separately.
+            </small>
 
 
             <label>
@@ -2039,7 +1954,7 @@
                 class="admin-primary-button full-width"
                 type="submit"
             >
-                UPLOAD IMAGE
+                UPLOAD IMAGES
             </button>
 
 
