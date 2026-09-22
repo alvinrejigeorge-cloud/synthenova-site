@@ -5945,3 +5945,169 @@ a {
     visibility: hidden;
     pointer-events: none;
 }
+
+/* =========================================================
+   FINAL MENU CLICK FIX — DESKTOP + TABLET + MOBILE
+========================================================= */
+
+.topbar {
+    position: fixed !important;
+    z-index: 10000 !important;
+}
+
+.menu-button {
+    position: relative !important;
+    z-index: 10002 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 48px !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.menu-button span {
+    pointer-events: none !important;
+}
+
+.menu-overlay {
+    z-index: 10001 !important;
+}
+
+.side-menu {
+    z-index: 10003 !important;
+}
+
+.side-menu-close {
+    position: relative;
+    z-index: 10004;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+@media (max-width: 750px) {
+    .menu-button {
+        width: 43px !important;
+        height: 43px !important;
+        flex-basis: 43px !important;
+        margin-left: 5px !important;
+    }
+}
+/* =========================================================
+   SYNTHENOVA MENU FINAL FIX
+   DESKTOP + TABLET + MOBILE
+========================================================= */
+
+.menu-button {
+    position: relative !important;
+
+    z-index: 10001 !important;
+
+    display: flex !important;
+
+    align-items: center;
+
+    justify-content: center;
+
+    pointer-events: auto !important;
+
+    cursor: pointer !important;
+
+    touch-action: manipulation;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.menu-button span {
+    pointer-events: none !important;
+}
+
+
+.menu-overlay {
+    position: fixed !important;
+
+    z-index: 9998 !important;
+}
+
+
+.side-menu {
+    position: fixed !important;
+
+    z-index: 10000 !important;
+}
+
+
+.side-menu.active {
+    transform: translateX(0) !important;
+}
+
+
+.menu-overlay.active {
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media (min-width: 751px) {
+
+    .menu-button {
+
+        display: flex !important;
+
+        pointer-events: auto !important;
+
+        visibility: visible !important;
+
+        opacity: 1 !important;
+
+        z-index: 10001 !important;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 750px) {
+
+    .menu-button {
+
+        display: flex !important;
+
+        width: 43px !important;
+
+        height: 43px !important;
+
+        min-width: 43px !important;
+
+        min-height: 43px !important;
+
+        flex: 0 0 43px !important;
+
+        pointer-events: auto !important;
+
+        cursor: pointer !important;
+
+        z-index: 10001 !important;
+
+    }
+
+}

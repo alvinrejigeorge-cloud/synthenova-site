@@ -1,19 +1,15 @@
 "use strict";
-
 /* =========================================================
    SYNTHENOVA
    PUBLIC FRONTEND + SUPABASE AUTH + ADMIN CONTROL CENTER
-
-
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
+
 function hidePageLoader() {
     const loader = document.getElementById("pageLoader");
 
-    if (!loader) {
-        return;
-    }
+    if (!loader) return;
 
     loader.classList.add("hidden");
 
@@ -21,224 +17,530 @@ function hidePageLoader() {
         loader.style.display = "none";
     }, 700);
 }
-    /* =====================================================
-       GLOBAL STATE
-    ===================================================== */
-
-    let supabaseClient = null;
-
-    let currentUser = null;
-
-    let isAdmin = false;
-
-    let editingTeamId = null;
-
-    let editingEventId = null;
-
-    let editingGalleryId = null;
-
-    const TEAM_BUCKET = "team photo";
-
-    const $ = (id) =>
-        document.getElementById(id);
-
-    const body = document.body;
 
 
-    /* =====================================================
-       INITIALIZE
-    ===================================================== */
+/* =========================================================
+   BASIC HELPERS
+========================================================= */
 
-try {
+const $ = (id) =>
+    document.getElementById(id);
 
-    await initializeSupabase();
+const body = document.body;
 
-    setupNavigation();
 
-    setupPublicInteractions();
+/* =========================================================
+   SYNTHENOVA MENU
+   DESKTOP + TABLET + MOBILE
+========================================================= */
 
-    setupAuthentication();
+const menuButton =
+    document.getElementById("menuButton");
 
-    setupAdminDashboard();
+const sideMenu =
+    document.getElementById("sideMenu");
 
-    await initializeAuth();
+const menuOverlay =
+    document.getElementById("menuOverlay");
 
-    if (supabaseClient) {
+const closeMenu =
+    document.getElementById("closeMenu");
 
-        await loadPublicTeam();
 
-        await loadPublicEvents();
+function openMenu() {
 
-        await loadPublicGallery();
-
+    if (sideMenu) {
+        sideMenu.classList.add("active");
     }
 
-    updateAuthUI();
+    if (menuOverlay) {
+        menuOverlay.classList.add("active");
+    }
 
-} catch (error) {
+    if (body) {
+        body.classList.add("menu-open");
+    }
 
-    console.error(
-        "SYNTHENOVA initialization error:",
-        error
-    );
+    if (menuButton) {
 
-} finally {
+        menuButton.classList.add("active");
 
-    hidePageLoader();
+        menuButton.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+        menuButton.setAttribute(
+            "aria-label",
+            "Close navigation menu"
+        );
+
+    }
 
 }
 
-    /* =====================================================
-       SUPABASE
-    ===================================================== */
 
-    async function initializeSupabase() {
+function closeSideMenu() {
 
-        try {
+    if (sideMenu) {
+        sideMenu.classList.remove("active");
+    }
 
-            const response =
-                await fetch(
-                    "/api/config",
-                    {
-                        cache: "no-store"
-                    }
-                );
+    if (menuOverlay) {
+        menuOverlay.classList.remove("active");
+    }
 
-            if (!response.ok) {
+    if (body) {
+        body.classList.remove("menu-open");
+    }
 
-                throw new Error(
-                    "Could not load Supabase configuration."
-                );
+    if (menuButton) {
 
-            }
+        menuButton.classList.remove("active");
 
-            const config =
-                await response.json();
+        menuButton.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+        menuButton.setAttribute(
+            "aria-label",
+            "Open navigation menu"
+        );
+
+    }
+
+}
+
+
+function toggleMenu(event) {
+
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (
+        sideMenu &&
+        sideMenu.classList.contains("active")
+    ) {
+
+        closeSideMenu();
+
+    } else {
+
+        openMenu();
+
+    }
+
+}
+
+
+if (menuButton) {
+
+    menuButton.setAttribute(
+        "type",
+        "button"
+    );
+
+    menuButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    menuButton.setAttribute(
+        "aria-label",
+        "Open navigation menu"
+    );
+
+    menuButton.style.pointerEvents =
+        "auto";
+
+    menuButton.style.cursor =
+        "pointer";
+
+
+    menuButton.addEventListener(
+        "click",
+        toggleMenu
+    );
+
+
+    menuButton.addEventListener(
+        "pointerup",
+        event => {
 
             if (
-                !config.supabaseUrl ||
-                !config.supabasePublishableKey
+                event.pointerType === "mouse"
             ) {
-
-                throw new Error(
-                    "Supabase configuration is missing."
-                );
-
+                return;
             }
+
+            toggleMenu(event);
+
+        }
+    );
+
+
+    menuButton.addEventListener(
+        "keydown",
+        event => {
 
             if (
-                typeof window.supabase ===
-                "undefined"
+                event.key === "Enter" ||
+                event.key === " "
             ) {
 
-                throw new Error(
-                    "Supabase library failed to load."
-                );
+                event.preventDefault();
+
+                toggleMenu(event);
 
             }
 
-            supabaseClient =
-                window.supabase.createClient(
-                    config.supabaseUrl,
-                    config.supabasePublishableKey
-                );
+        }
+    );
 
-            console.log(
-                "SYNTHENOVA Supabase connected."
+}
+
+
+if (closeMenu) {
+
+    closeMenu.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            closeSideMenu();
+
+        }
+    );
+
+}
+
+
+if (menuOverlay) {
+
+    menuOverlay.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            closeSideMenu();
+
+        }
+    );
+
+}
+
+
+document
+    .querySelectorAll(
+        ".menu-navigation a, .mobile-nav a"
+    )
+    .forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                () => {
+
+                    closeSideMenu();
+
+                }
             );
 
-            return true;
+        }
+    );
 
-        } catch (error) {
 
-            console.error(
-                "Supabase initialization error:",
-                error
-            );
+document.addEventListener(
+    "keydown",
+    event => {
 
-            return false;
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeSideMenu();
 
         }
 
     }
+);
 
 
-    /* =====================================================
-       AUTH
-    ===================================================== */
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-    async function initializeAuth() {
+let supabaseClient = null;
 
-        if (!supabaseClient) {
-            return;
+let currentUser = null;
+
+let isAdmin = false;
+
+let editingTeamId = null;
+
+let editingEventId = null;
+
+let editingGalleryId = null;
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   INITIALIZE SUPABASE
+========================================================= */
+
+async function initializeSupabase() {
+
+    try {
+
+        const response =
+            await fetch("/api/config");
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load Supabase configuration."
+            );
         }
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.auth.getSession();
+        const config =
+            await response.json();
 
-        if (error) {
+        if (
+            !config.success ||
+            !config.supabaseUrl ||
+            !config.supabasePublishableKey
+        ) {
 
-            console.error(
-                "Session error:",
-                error
+            throw new Error(
+                "Supabase configuration is missing."
             );
 
-            return;
+        }
+
+        if (
+            typeof window.supabase ===
+            "undefined"
+        ) {
+
+            throw new Error(
+                "Supabase library is not loaded."
+            );
 
         }
 
-        if (data?.session?.user) {
+        supabaseClient =
+            window.supabase.createClient(
+                config.supabaseUrl,
+                config.supabasePublishableKey
+            );
 
-            currentUser =
-                data.session.user;
+        console.log(
+            "SYNTHENOVA Supabase initialized."
+        );
 
-            isAdmin =
-                await checkAdmin(
-                    currentUser.id
-                );
+    } catch (error) {
 
-        }
+        console.error(
+            "Supabase initialization error:",
+            error
+        );
 
-        supabaseClient.auth.onAuthStateChange(
-            async (event, session) => {
+        supabaseClient = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function setupNavigation() {
+
+    const navLinks =
+        document.querySelectorAll(
+            'a[href^="#"]'
+        );
+
+    navLinks.forEach(link => {
+
+        link.addEventListener(
+            "click",
+            event => {
+
+                const targetId =
+                    link.getAttribute("href");
 
                 if (
-                    event ===
-                    "SIGNED_OUT"
+                    !targetId ||
+                    targetId === "#"
+                ) {
+                    return;
+                }
+
+                const target =
+                    document.querySelector(
+                        targetId
+                    );
+
+                if (!target) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                closeSideMenu();
+
+                const header =
+                    document.querySelector(
+                        ".site-header, header"
+                    );
+
+                const headerHeight =
+                    header
+                        ? header.offsetHeight
+                        : 0;
+
+                const targetPosition =
+                    target.getBoundingClientRect()
+                        .top +
+                    window.scrollY -
+                    headerHeight -
+                    20;
+
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: "smooth"
+                });
+
+            }
+        );
+
+    });
+
+
+    const logo =
+        document.querySelector(
+            ".logo, .brand-logo, [data-home]"
+        );
+
+    if (logo) {
+
+        logo.addEventListener(
+            "click",
+            event => {
+
+                const home =
+                    document.querySelector(
+                        "#home"
+                    );
+
+                if (!home) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                closeSideMenu();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PUBLIC INTERACTIONS
+========================================================= */
+
+function setupPublicInteractions() {
+
+    const yearElements =
+        document.querySelectorAll(
+            "[data-current-year]"
+        );
+
+    yearElements.forEach(
+        element => {
+
+            element.textContent =
+                new Date().getFullYear();
+
+        }
+    );
+
+
+    const backToTop =
+        $("backToTop");
+
+    if (backToTop) {
+
+        window.addEventListener(
+            "scroll",
+            () => {
+
+                if (
+                    window.scrollY >
+                    500
                 ) {
 
-                    currentUser = null;
+                    backToTop.classList.add(
+                        "visible"
+                    );
 
-                    isAdmin = false;
+                } else {
 
-                    updateAuthUI();
-
-                    return;
-
-                }
-
-                if (session?.user) {
-
-                    currentUser =
-                        session.user;
-
-                    isAdmin =
-                        await checkAdmin(
-                            currentUser.id
-                        );
-
-                    updateAuthUI();
-
-                    if (isAdmin) {
-
-                        await loadDashboardData();
-
-                    }
+                    backToTop.classList.remove(
+                        "visible"
+                    );
 
                 }
+
+            }
+        );
+
+
+        backToTop.addEventListener(
+            "click",
+            () => {
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
 
             }
         );
@@ -246,464 +548,201 @@ try {
     }
 
 
-    async function checkAdmin(userId) {
+    const contactForm =
+        $("contactForm");
 
-        if (
-            !supabaseClient ||
-            !userId
-        ) {
+    if (contactForm) {
 
-            return false;
+        contactForm.addEventListener(
+            "submit",
+            event => {
 
-        }
+                event.preventDefault();
 
-        try {
+                const message =
+                    $("contactMessage");
 
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("admin_users")
-                    .select("user_id")
-                    .eq(
-                        "user_id",
-                        userId
-                    )
-                    .maybeSingle();
+                if (message) {
 
-            if (error) {
+                    message.textContent =
+                        "THANK YOU. YOUR MESSAGE HAS BEEN RECEIVED.";
 
-                console.error(
-                    "Admin verification error:",
-                    error
-                );
-
-                return false;
-
-            }
-
-            return !!data;
-
-        } catch (error) {
-
-            console.error(
-                "Admin check error:",
-                error
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-    function setupAuthentication() {
-
-        const loginForm =
-            $("loginForm");
-
-        if (loginForm) {
-
-            loginForm.addEventListener(
-                "submit",
-                handleLogin
-            );
-
-        }
-
-
-        const logoutButton =
-            $("logoutButton");
-
-        if (logoutButton) {
-
-            logoutButton.addEventListener(
-                "click",
-                logoutAdmin
-            );
-
-        }
-
-
-        const loginClose =
-            $("closeLoginModal");
-
-        if (loginClose) {
-
-            loginClose.addEventListener(
-                "click",
-                closeLoginModal
-            );
-
-        }
-
-
-        const loginModal =
-            $("loginModal");
-
-        if (loginModal) {
-
-            loginModal.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        loginModal
-                    ) {
-
-                        closeLoginModal();
-
-                    }
+                    message.classList.add(
+                        "visible"
+                    );
 
                 }
-            );
 
-        }
+                contactForm.reset();
+
+            }
+        );
 
     }
 
+}
 
-    async function handleLogin(event) {
 
-        event.preventDefault();
+/* =========================================================
+   AUTH UI HELPERS
+========================================================= */
 
-        if (!supabaseClient) {
+function updateAuthUI() {
 
-            showMessage(
-                "loginMessage",
-                "Supabase is not available.",
-                true
-            );
+    const loginButton =
+        $("loginButton");
 
-            return;
+    const adminButton =
+        $("adminButton");
 
+    const logoutButton =
+        $("logoutButton");
+
+    const authStatus =
+        $("authStatus");
+
+    if (currentUser) {
+
+        if (loginButton) {
+            loginButton.style.display =
+                "none";
         }
 
-        const emailInput =
-            $("loginEmail");
-
-        const passwordInput =
-            $("loginPassword");
-
-        const button =
-            $("loginSubmitButton") ||
-            $("loginButton");
-
-        const email =
-            emailInput?.value
-                .trim() || "";
-
-        const password =
-            passwordInput?.value || "";
-
-        if (!email || !password) {
-
-            showMessage(
-                "loginMessage",
-                "ENTER EMAIL AND PASSWORD.",
-                true
-            );
-
-            return;
-
+        if (logoutButton) {
+            logoutButton.style.display =
+                "inline-flex";
         }
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.textContent =
-                "SIGNING IN...";
-
-        }
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth
-                    .signInWithPassword({
-                        email,
-                        password
-                    });
-
-            if (error) {
-                throw error;
-            }
-
-            if (!data?.user) {
-
-                throw new Error(
-                    "Login failed."
-                );
-
-            }
-
-            const admin =
-                await checkAdmin(
-                    data.user.id
-                );
-
-            if (!admin) {
-
-                await supabaseClient.auth
-                    .signOut();
-
-                throw new Error(
-                    "This account is not registered as an admin."
-                );
-
-            }
-
-            currentUser =
-                data.user;
-
-            isAdmin = true;
-
-            closeLoginModal();
-
-            updateAuthUI();
-
-            await loadDashboardData();
-
-            openAdminDashboard();
-
-        } catch (error) {
-
-            console.error(
-                "Login error:",
-                error
-            );
-
-            showMessage(
-                "loginMessage",
-                friendlyError(error),
-                true
-            );
-
-        } finally {
-
-            if (button) {
-
-                button.disabled = false;
-
-                button.textContent =
-                    "SIGN IN";
-
-            }
-
-        }
-
-    }
-
-
-    async function logoutAdmin() {
-
-        if (!supabaseClient) {
-            return;
-        }
-
-        try {
-
-            await supabaseClient.auth.signOut();
-
-        } catch (error) {
-
-            console.error(
-                "Logout error:",
-                error
-            );
-
-        }
-
-        currentUser = null;
-
-        isAdmin = false;
-
-        closeAdminDashboard();
-
-        updateAuthUI();
-
-    }
-
-
-    function updateAuthUI() {
-
-        document
-            .querySelectorAll(
-                "[data-admin-only]"
-            )
-            .forEach(element => {
-
-                element.style.display =
-                    isAdmin
-                        ? ""
-                        : "none";
-
-            });
-
-        const authStatus =
-            $("authStatus");
 
         if (authStatus) {
 
             authStatus.textContent =
                 isAdmin
-                    ? "AUTHENTICATED"
-                    : "GUEST";
+                    ? "ADMIN"
+                    : "AUTHENTICATED";
 
+        }
+
+        if (adminButton) {
+
+            adminButton.style.display =
+                isAdmin
+                    ? "inline-flex"
+                    : "none";
+
+        }
+
+    } else {
+
+        if (loginButton) {
+            loginButton.style.display =
+                "inline-flex";
+        }
+
+        if (logoutButton) {
+            logoutButton.style.display =
+                "none";
+        }
+
+        if (adminButton) {
+            adminButton.style.display =
+                "none";
+        }
+
+        if (authStatus) {
+            authStatus.textContent =
+                "GUEST";
         }
 
     }
 
-
-    function openLoginModal() {
-
-        const modal =
-            $("loginModal");
-
-        if (!modal) {
-            return;
-        }
-
-        modal.classList.add(
-            "active"
-        );
-
-        body.classList.add(
-            "modal-open"
-        );
-
-    }
+}
 
 
-    function closeLoginModal() {
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
 
-        const modal =
-            $("loginModal");
+function setupAuthentication() {
 
-        if (modal) {
+    const loginForm =
+        $("loginForm");
 
-            modal.classList.remove(
-                "active"
-            );
+    const loginModal =
+        $("loginModal");
 
-        }
+    const closeLogin =
+        $("closeLogin");
 
-        body.classList.remove(
-            "modal-open"
-        );
+    const loginButton =
+        $("loginButton");
 
-    }
+    const logoutButton =
+        $("logoutButton");
+
+    const adminButton =
+        $("adminButton");
 
 
-    /* =====================================================
-       NAVIGATION
-    ===================================================== */
+    if (loginButton) {
 
-    function setupNavigation() {
+        loginButton.addEventListener(
+            "click",
+            event => {
 
-        document
-            .querySelectorAll(
-                "a[href^='#']"
-            )
-            .forEach(link => {
+                event.preventDefault();
 
-                link.addEventListener(
-                    "click",
-                    event => {
-
-                        const href =
-                            link.getAttribute(
-                                "href"
-                            );
-
-                        if (
-                            !href ||
-                            href === "#"
-                        ) {
-                            return;
-                        }
-
-                        const target =
-                            document.querySelector(
-                                href
-                            );
-
-                        if (!target) {
-                            return;
-                        }
-
-                        event.preventDefault();
-
-                        target.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start"
-                        });
-
-                    }
+                loginModal?.classList.add(
+                    "active"
                 );
 
-            });
+                body.classList.add(
+                    "modal-open"
+                );
+
+            }
+        );
 
     }
 
 
-    /* =====================================================
-       PUBLIC INTERACTIONS
-    ===================================================== */
+    if (closeLogin) {
 
-    function setupPublicInteractions() {
+        closeLogin.addEventListener(
+            "click",
+            () => {
 
-        document
-            .querySelectorAll(
-                "[data-open-login], .login-button, #loginButton"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-                        if (isAdmin) {
-
-                            openAdminDashboard();
-
-                        } else {
-
-                            openLoginModal();
-
-                        }
-
-                    }
+                loginModal?.classList.remove(
+                    "active"
                 );
 
-            });
+                body.classList.remove(
+                    "modal-open"
+                );
+
+            }
+        );
+
+    }
 
 
-        document.addEventListener(
-            "keydown",
+    if (loginModal) {
+
+        loginModal.addEventListener(
+            "click",
             event => {
 
                 if (
-                    event.key ===
-                    "Escape"
+                    event.target ===
+                    loginModal
                 ) {
 
-                    closeLoginModal();
+                    loginModal.classList.remove(
+                        "active"
+                    );
 
-                    closeAdminDashboard();
-
-                    closeTeamProfile();
-
-                    closeGalleryPreview();
+                    body.classList.remove(
+                        "modal-open"
+                    );
 
                 }
 
@@ -713,308 +752,569 @@ try {
     }
 
 
-    /* =====================================================
-       ADMIN DASHBOARD
-    ===================================================== */
+    if (loginForm) {
 
-    function setupAdminDashboard() {
+        loginForm.addEventListener(
+            "submit",
+            async event => {
 
-        const closeButton =
-            $("closeAdminDashboard");
+                event.preventDefault();
 
-        if (closeButton) {
+                const email =
+                    $("loginEmail")?.value
+                        ?.trim();
 
-            closeButton.addEventListener(
-                "click",
-                closeAdminDashboard
-            );
+                const password =
+                    $("loginPassword")?.value;
 
-        }
+                const message =
+                    $("loginMessage");
 
+                if (!email || !password) {
 
-        const dashboard =
-            $("adminDashboard");
+                    if (message) {
 
-        if (dashboard) {
-
-            dashboard.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        dashboard
-                    ) {
-
-                        closeAdminDashboard();
+                        message.textContent =
+                            "ENTER EMAIL AND PASSWORD.";
 
                     }
 
-                }
-            );
-
-        }
-
-
-        document
-            .querySelectorAll(
-                ".admin-tab"
-            )
-            .forEach(tab => {
-
-                tab.addEventListener(
-                    "click",
-                    () => {
-
-                        switchAdminTab(
-                            tab.dataset.adminTab
-                        );
-
-                    }
-                );
-
-            });
-
-
-        document
-            .querySelectorAll(
-                "[data-admin-tab]"
-            )
-            .forEach(element => {
-
-                if (
-                    element.classList.contains(
-                        "admin-tab"
-                    )
-                ) {
                     return;
+
                 }
 
-                element.addEventListener(
-                    "click",
-                    () => {
+                if (!supabaseClient) {
 
-                        switchAdminTab(
-                            element.dataset.adminTab
-                        );
+                    if (message) {
+
+                        message.textContent =
+                            "SUPABASE IS NOT AVAILABLE.";
 
                     }
-                );
 
-            });
+                    return;
 
+                }
 
-        $("addTeamButton")
-            ?.addEventListener(
-                "click",
-                () => openTeamAdminModal()
-            );
+                if (message) {
 
+                    message.textContent =
+                        "AUTHENTICATING...";
 
-        $("closeTeamAdminModal")
-            ?.addEventListener(
-                "click",
-                closeTeamAdminModal
-            );
+                }
 
+                try {
 
-        $("addEventButton")
-            ?.addEventListener(
-                "click",
-                () => openEventAdminModal()
-            );
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signInWithPassword({
+                                email,
+                                password
+                            });
 
+                    if (error) {
+                        throw error;
+                    }
 
-        $("closeEventAdminModal")
-            ?.addEventListener(
-                "click",
-                closeEventAdminModal
-            );
+                    currentUser =
+                        data.user;
 
+                    await verifyAdmin();
 
-        $("addGalleryButton")
-            ?.addEventListener(
-                "click",
-                () => openGalleryAdminModal()
-            );
+                    updateAuthUI();
 
+                    loginModal?.classList.remove(
+                        "active"
+                    );
 
-        $("closeGalleryAdminModal")
-            ?.addEventListener(
-                "click",
-                closeGalleryAdminModal
-            );
+                    body.classList.remove(
+                        "modal-open"
+                    );
 
+                    if (isAdmin) {
 
-        $("teamAdminForm")
-            ?.addEventListener(
-                "submit",
-                saveTeam
-            );
+                        openAdminDashboard();
 
+                    }
 
-        $("eventAdminForm")
-            ?.addEventListener(
-                "submit",
-                saveEvent
-            );
+                } catch (error) {
 
+                    console.error(
+                        "Login error:",
+                        error
+                    );
 
-        $("galleryAdminForm")
-            ?.addEventListener(
-                "submit",
-                saveGallery
-            );
+                    if (message) {
 
-
-        $("teamAdminModal")
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        $("teamAdminModal")
-                    ) {
-
-                        closeTeamAdminModal();
+                        message.textContent =
+                            error.message ||
+                            "LOGIN FAILED.";
 
                     }
 
                 }
-            );
 
-
-        $("eventAdminModal")
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        $("eventAdminModal")
-                    ) {
-
-                        closeEventAdminModal();
-
-                    }
-
-                }
-            );
-
-
-        $("galleryAdminModal")
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        $("galleryAdminModal")
-                    ) {
-
-                        closeGalleryAdminModal();
-
-                    }
-
-                }
-            );
-
-    }
-
-
-    function openAdminDashboard() {
-
-        if (!isAdmin) {
-
-            openLoginModal();
-
-            return;
-
-        }
-
-        const dashboard =
-            $("adminDashboard");
-
-        if (!dashboard) {
-            return;
-        }
-
-        dashboard.classList.add(
-            "active"
-        );
-
-        body.classList.add(
-            "modal-open"
-        );
-
-        loadDashboardData();
-
-        switchAdminTab(
-            "team"
+            }
         );
 
     }
 
 
-    function closeAdminDashboard() {
+    if (logoutButton) {
 
-        const dashboard =
-            $("adminDashboard");
+        logoutButton.addEventListener(
+            "click",
+            async event => {
 
-        if (dashboard) {
+                event.preventDefault();
 
-            dashboard.classList.remove(
-                "active"
-            );
+                await logoutUser();
 
-        }
-
-        body.classList.remove(
-            "modal-open"
+            }
         );
 
     }
 
 
-    function switchAdminTab(
-        tabName
+    if (adminButton) {
+
+        adminButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                if (isAdmin) {
+                    openAdminDashboard();
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIALIZE AUTH
+========================================================= */
+
+async function initializeAuth() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    try {
+
+        const {
+            data
+        } =
+            await supabaseClient
+                .auth
+                .getSession();
+
+        currentUser =
+            data?.session?.user || null;
+
+        if (currentUser) {
+
+            await verifyAdmin();
+
+        }
+
+        updateAuthUI();
+
+
+        supabaseClient
+            .auth
+            .onAuthStateChange(
+                async (
+                    event,
+                    session
+                ) => {
+
+                    currentUser =
+                        session?.user ||
+                        null;
+
+                    if (currentUser) {
+
+                        await verifyAdmin();
+
+                    } else {
+
+                        isAdmin = false;
+
+                    }
+
+                    updateAuthUI();
+
+                }
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Auth initialization error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   VERIFY ADMIN
+========================================================= */
+
+async function verifyAdmin() {
+
+    isAdmin = false;
+
+    if (
+        !supabaseClient ||
+        !currentUser
     ) {
+        return false;
+    }
 
-        if (!tabName) {
-            return;
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("admin_users")
+                .select("user_id")
+                .eq(
+                    "user_id",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+        if (error) {
+            throw error;
         }
 
-        document
-            .querySelectorAll(
-                ".admin-tab"
-            )
-            .forEach(tab => {
+        isAdmin =
+            !!data;
 
-                tab.classList.toggle(
-                    "active",
-                    tab.dataset.adminTab ===
+        return isAdmin;
+
+    } catch (error) {
+
+        console.error(
+            "Admin verification error:",
+            error
+        );
+
+        isAdmin = false;
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutUser() {
+
+    try {
+
+        if (supabaseClient) {
+
+            await supabaseClient
+                .auth
+                .signOut();
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+    currentUser = null;
+
+    isAdmin = false;
+
+    updateAuthUI();
+
+    closeAdminDashboard();
+
+}
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
+
+function setupAdminDashboard() {
+
+    const adminDashboard =
+        $("adminDashboard");
+
+    const closeAdmin =
+        $("closeAdmin");
+
+    const adminLogout =
+        $("adminLogout");
+
+    const adminTabs =
+        document.querySelectorAll(
+            ".admin-tab"
+        );
+
+
+    if (closeAdmin) {
+
+        closeAdmin.addEventListener(
+            "click",
+            () => {
+
+                closeAdminDashboard();
+
+            }
+        );
+
+    }
+
+
+    if (adminLogout) {
+
+        adminLogout.addEventListener(
+            "click",
+            async () => {
+
+                await logoutUser();
+
+            }
+        );
+
+    }
+
+
+    adminTabs.forEach(tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                const tabName =
+                    tab.dataset.adminTab;
+
+                switchAdminTab(
                     tabName
                 );
 
-            });
+            }
+        );
+
+    });
 
 
-        const panels = {
-            team:
-                $("adminTeamPanel"),
+    document
+        .querySelectorAll(
+            "[data-admin-tab]"
+        )
+        .forEach(card => {
 
-            events:
-                $("adminEventsPanel"),
+            if (
+                card.classList.contains(
+                    "admin-tab"
+                )
+            ) {
+                return;
+            }
 
-            gallery:
-                $("adminGalleryPanel")
-        };
+            card.addEventListener(
+                "click",
+                () => {
+
+                    const tabName =
+                        card.dataset.adminTab;
+
+                    switchAdminTab(
+                        tabName
+                    );
+
+                }
+            );
+
+        });
 
 
-        Object.entries(
-            panels
-        ).forEach(
+    const addTeamButton =
+        $("addTeamButton");
+
+    if (addTeamButton) {
+
+        addTeamButton.addEventListener(
+            "click",
+            () => {
+
+                openTeamAdminModal();
+
+            }
+        );
+
+    }
+
+
+    const addEventButton =
+        $("addEventButton");
+
+    if (addEventButton) {
+
+        addEventButton.addEventListener(
+            "click",
+            () => {
+
+                openEventAdminModal();
+
+            }
+        );
+
+    }
+
+
+    const addGalleryButton =
+        $("addGalleryButton");
+
+    if (addGalleryButton) {
+
+        addGalleryButton.addEventListener(
+            "click",
+            () => {
+
+                openGalleryAdminModal();
+
+            }
+        );
+
+    }
+
+
+    setupTeamAdminForm();
+
+    setupEventAdminForm();
+
+    setupGalleryAdminForm();
+
+}
+
+
+/* =========================================================
+   OPEN ADMIN DASHBOARD
+========================================================= */
+
+async function openAdminDashboard() {
+
+    if (!isAdmin) {
+
+        const verified =
+            await verifyAdmin();
+
+        if (!verified) {
+            return;
+        }
+
+    }
+
+    const dashboard =
+        $("adminDashboard");
+
+    if (!dashboard) {
+        return;
+    }
+
+    dashboard.classList.add(
+        "active"
+    );
+
+    body.classList.add(
+        "modal-open"
+    );
+
+    switchAdminTab("team");
+
+    await refreshAdminDashboard();
+
+}
+
+
+/* =========================================================
+   CLOSE ADMIN DASHBOARD
+========================================================= */
+
+function closeAdminDashboard() {
+
+    const dashboard =
+        $("adminDashboard");
+
+    if (dashboard) {
+
+        dashboard.classList.remove(
+            "active"
+        );
+
+    }
+
+    body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   SWITCH ADMIN TAB
+========================================================= */
+
+function switchAdminTab(
+    tabName
+) {
+
+    document
+        .querySelectorAll(
+            ".admin-tab"
+        )
+        .forEach(tab => {
+
+            tab.classList.toggle(
+                "active",
+                tab.dataset.adminTab ===
+                tabName
+            );
+
+        });
+
+
+    const panels = {
+        team: $("adminTeamPanel"),
+        events: $("adminEventsPanel"),
+        gallery: $("adminGalleryPanel")
+    };
+
+
+    Object.entries(panels)
+        .forEach(
             ([name, panel]) => {
 
                 if (!panel) {
@@ -1023,52 +1323,70 @@ try {
 
                 panel.classList.toggle(
                     "active",
-                    name ===
-                    tabName
+                    name === tabName
                 );
 
             }
         );
 
 
-        if (
-            tabName ===
-            "team"
-        ) {
+    if (
+        tabName === "team"
+    ) {
 
-            loadAdminTeam();
-
-        }
-
-        if (
-            tabName ===
-            "events"
-        ) {
-
-            loadAdminEvents();
-
-        }
-
-        if (
-            tabName ===
-            "gallery"
-        ) {
-
-            loadAdminGallery();
-
-        }
+        loadAdminTeam();
 
     }
 
 
-    async function loadDashboardData() {
+    if (
+        tabName === "events"
+    ) {
 
-        if (
-            !supabaseClient ||
-            !isAdmin
-        ) {
-            return;
-        }
+        loadAdminEvents();
+
+    }
+
+
+    if (
+        tabName === "gallery"
+    ) {
+
+        loadAdminGallery();
+
+    }
+
+}
+
+
+/* =========================================================
+   REFRESH ADMIN DASHBOARD
+========================================================= */
+
+async function refreshAdminDashboard() {
+
+    await Promise.all([
+        loadAdminTeam(),
+        loadAdminEvents(),
+        loadAdminGallery()
+    ]);
+
+    updateAdminCounts();
+
+}
+
+
+/* =========================================================
+   UPDATE ADMIN COUNTS
+========================================================= */
+
+async function updateAdminCounts() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    try {
 
         const [
             teamResult,
@@ -1108,52 +1426,554 @@ try {
             ]);
 
 
-        if ($("teamCount")) {
+        const teamCount =
+            $("teamCount");
 
-            $("teamCount").textContent =
+        const eventCount =
+            $("eventCount");
+
+        const galleryCount =
+            $("galleryCount");
+
+
+        if (teamCount) {
+
+            teamCount.textContent =
                 teamResult.count || 0;
 
         }
 
-        if ($("eventCount")) {
 
-            $("eventCount").textContent =
+        if (eventCount) {
+
+            eventCount.textContent =
                 eventResult.count || 0;
 
         }
 
-        if ($("galleryCount")) {
 
-            $("galleryCount").textContent =
+        if (galleryCount) {
+
+            galleryCount.textContent =
                 galleryResult.count || 0;
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Admin count error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   TEAM ADMIN FORM
+========================================================= */
+
+function setupTeamAdminForm() {
+
+    const form =
+        $("teamAdminForm");
+
+    const modal =
+        $("teamAdminModal");
+
+    const closeButton =
+        $("closeTeamAdmin");
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            () => {
+
+                closeTeamAdminModal();
+
+            }
+        );
+
+    }
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    closeTeamAdminModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            await saveTeamMember();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OPEN TEAM ADMIN MODAL
+========================================================= */
+
+function openTeamAdminModal(
+    member = null
+) {
+
+    const modal =
+        $("teamAdminModal");
+
+    const form =
+        $("teamAdminForm");
+
+    if (!modal || !form) {
+        return;
+    }
+
+    editingTeamId =
+        member?.id || null;
+
+
+    const name =
+        $("adminTeamName");
+
+    const position =
+        $("adminTeamPosition");
+
+    const className =
+        $("adminTeamClass");
+
+    const category =
+        $("adminTeamCategory");
+
+    const order =
+        $("adminTeamOrder");
+
+    const photo =
+        $("adminTeamPhoto");
+
+    const active =
+        $("adminTeamActive");
+
+    const message =
+        $("teamAdminMessage");
+
+
+    if (name) {
+        name.value =
+            member?.name || "";
+    }
+
+    if (position) {
+        position.value =
+            member?.position || "";
+    }
+
+    if (className) {
+        className.value =
+            member?.class_name || "";
+    }
+
+    if (category) {
+        category.value =
+            member?.category || "general";
+    }
+
+    if (order) {
+        order.value =
+            member?.display_order ??
+            0;
+    }
+
+    if (photo) {
+        photo.value = "";
+    }
+
+    if (active) {
+        active.checked =
+            member
+                ? member.active !== false
+                : true;
+    }
+
+    if (message) {
+        message.textContent = "";
+    }
+
+
+    const title =
+        modal.querySelector(
+            ".admin-modal-title"
+        );
+
+    if (title) {
+
+        title.textContent =
+            member
+                ? "EDIT TEAM MEMBER"
+                : "ADD TEAM MEMBER";
+
+    }
+
+
+    modal.classList.add(
+        "active"
+    );
+
+    body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE TEAM ADMIN MODAL
+========================================================= */
+
+function closeTeamAdminModal() {
+
+    const modal =
+        $("teamAdminModal");
+
+    if (modal) {
+
+        modal.classList.remove(
+            "active"
+        );
+
+    }
+
+    body.classList.remove(
+        "modal-open"
+    );
+
+    editingTeamId = null;
+
+}
+
+
+/* =========================================================
+   SAVE TEAM MEMBER
+========================================================= */
+
+async function saveTeamMember() {
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    if (!isAdmin) {
+        return;
+    }
+
+
+    const name =
+        $("adminTeamName")?.value
+            ?.trim();
+
+    const position =
+        $("adminTeamPosition")?.value
+            ?.trim();
+
+    const className =
+        $("adminTeamClass")?.value
+            ?.trim();
+
+    const category =
+        $("adminTeamCategory")?.value
+            ?.trim() ||
+        "general";
+
+    const order =
+        Number(
+            $("adminTeamOrder")?.value
+        ) || 0;
+
+    const photoInput =
+        $("adminTeamPhoto");
+
+    const active =
+        $("adminTeamActive")
+            ?.checked !== false;
+
+    const message =
+        $("teamAdminMessage");
+
+    const saveButton =
+        $("saveTeamButton");
+
+
+    if (!name || !position) {
+
+        if (message) {
+
+            message.textContent =
+                "NAME AND POSITION ARE REQUIRED.";
+
+        }
+
+        return;
+
+    }
+
+
+    if (saveButton) {
+
+        saveButton.disabled = true;
+
+        saveButton.textContent =
+            "SAVING...";
+
+    }
+
+
+    try {
+
+        let photoURL = null;
+
+
+        if (editingTeamId) {
+
+            const {
+                data: existingMember
+            } =
+                await supabaseClient
+                    .from("team_members")
+                    .select("photo_url")
+                    .eq(
+                        "id",
+                        editingTeamId
+                    )
+                    .maybeSingle();
+
+            photoURL =
+                existingMember?.photo_url ||
+                null;
+
+        }
+
+
+        if (
+            photoInput &&
+            photoInput.files &&
+            photoInput.files.length > 0
+        ) {
+
+            const file =
+                photoInput.files[0];
+
+            const extension =
+                file.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+            const fileName =
+                `${crypto.randomUUID()}.${extension}`;
+
+            const filePath =
+                `team/${fileName}`;
+
+
+            const {
+                error: uploadError
+            } =
+                await supabaseClient
+                    .storage
+                    .from("team photo")
+                    .upload(
+                        filePath,
+                        file,
+                        {
+                            cacheControl:
+                                "3600",
+                            upsert:
+                                false
+                        }
+                    );
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+
+            const {
+                data: publicData
+            } =
+                supabaseClient
+                    .storage
+                    .from("team photo")
+                    .getPublicUrl(
+                        filePath
+                    );
+
+            photoURL =
+                publicData?.publicUrl ||
+                photoURL;
+
+        }
+
+
+        const teamData = {
+            name,
+            position,
+            class_name:
+                className || null,
+            category,
+            photo_url:
+                photoURL,
+            display_order:
+                order,
+            active
+        };
+
+
+        if (editingTeamId) {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("team_members")
+                    .update(
+                        teamData
+                    )
+                    .eq(
+                        "id",
+                        editingTeamId
+                    );
+
+            if (error) {
+                throw error;
+            }
+
+        } else {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("team_members")
+                    .insert(
+                        teamData
+                    );
+
+            if (error) {
+                throw error;
+            }
+
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                "TEAM MEMBER SAVED SUCCESSFULLY.";
+
+        }
+
+
+        closeTeamAdminModal();
+
+        await loadAdminTeam();
+
+        await loadPublicTeam();
+
+        await updateAdminCounts();
+
+
+    } catch (error) {
+
+        console.error(
+            "Save team member error:",
+            error
+        );
+
+        if (message) {
+
+            message.textContent =
+                error.message ||
+                "UNABLE TO SAVE TEAM MEMBER.";
+
+        }
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                "SAVE TEAM MEMBER";
 
         }
 
     }
 
+}
 
-    /* =====================================================
-       TEAM ADMIN
-    ===================================================== */
 
-    async function loadAdminTeam() {
+/* =========================================================
+   LOAD ADMIN TEAM
+========================================================= */
 
-        const list =
-            $("adminTeamList");
+async function loadAdminTeam() {
 
-        if (
-            !list ||
-            !supabaseClient ||
-            !isAdmin
-        ) {
-            return;
-        }
+    const container =
+        $("adminTeamList");
 
-        list.innerHTML =
-            `<div class="admin-loading">
-                LOADING TEAM...
+    if (!container) {
+        return;
+    }
+
+    if (!supabaseClient) {
+
+        container.innerHTML =
+            `<div class="admin-empty">
+                SUPABASE UNAVAILABLE.
             </div>`;
 
+        return;
+
+    }
+
+
+    container.innerHTML =
+        `<div class="admin-loading">
+            LOADING TEAM...
+        </div>`;
+
+
+    try {
 
         const {
             data,
@@ -1161,589 +1981,22 @@ try {
         } =
             await supabaseClient
                 .from("team_members")
-                .select("*")
+                .select(`
+                    id,
+                    name,
+                    position,
+                    class_name,
+                    category,
+                    photo_url,
+                    display_order,
+                    active,
+                    created_at,
+                    updated_at
+                `)
                 .order(
                     "display_order",
                     {
                         ascending: true
-                    }
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: true
-                    }
-                );
-
-
-        if (error) {
-
-            console.error(
-                "Team loading error:",
-                error
-            );
-
-            list.innerHTML =
-                `<div class="admin-empty">
-                    FAILED TO LOAD TEAM.
-                </div>`;
-
-            return;
-
-        }
-
-
-        if (
-            !data ||
-            data.length === 0
-        ) {
-
-            list.innerHTML =
-                `<div class="admin-empty">
-                    NO TEAM MEMBERS YET.
-                </div>`;
-
-            return;
-
-        }
-
-
-        list.innerHTML =
-            data
-                .map(
-                    member =>
-                        createAdminTeamCard(
-                            member
-                        )
-                )
-                .join("");
-
-
-        list
-            .querySelectorAll(
-                "[data-edit-team]"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const member =
-                            data.find(
-                                item =>
-                                    item.id ===
-                                    button.dataset.editTeam
-                            );
-
-                        if (member) {
-
-                            openTeamAdminModal(
-                                member
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
-
-
-        list
-            .querySelectorAll(
-                "[data-delete-team]"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const member =
-                            data.find(
-                                item =>
-                                    item.id ===
-                                    button.dataset.deleteTeam
-                            );
-
-                        if (member) {
-
-                            deleteTeamMember(
-                                member
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
-
-    }
-
-
-    function createAdminTeamCard(
-        member
-    ) {
-
-        const photo =
-            member.photo_url
-                ? `
-                    <img
-                        src="${escapeAttribute(
-                            member.photo_url
-                        )}"
-                        alt="${escapeAttribute(
-                            member.name
-                        )}"
-                    >
-                `
-                : `
-                    <div class="admin-no-image">
-                        NO PHOTO
-                    </div>
-                `;
-
-
-        return `
-            <article class="admin-data-card">
-
-                <div class="admin-data-image">
-                    ${photo}
-                </div>
-
-                <div class="admin-data-content">
-
-                    <h3>
-                        ${escapeHTML(
-                            member.name ||
-                            "Unnamed"
-                        )}
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            member.position ||
-                            "MEMBER"
-                        )}
-                    </p>
-
-                    <small>
-                        ${escapeHTML(
-                            member.class_name ||
-                            ""
-                        )}
-                    </small>
-
-                    <div class="admin-card-meta">
-                        ${member.active
-                            ? "ACTIVE"
-                            : "HIDDEN"}
-                        ·
-                        ORDER ${Number(
-                            member.display_order
-                        ) || 0}
-                    </div>
-
-                    <div class="admin-card-actions">
-
-                        <button
-                            type="button"
-                            class="admin-secondary-button"
-                            data-edit-team="${escapeAttribute(
-                                member.id
-                            )}"
-                        >
-                            EDIT
-                        </button>
-
-                        <button
-                            type="button"
-                            class="admin-danger-button"
-                            data-delete-team="${escapeAttribute(
-                                member.id
-                            )}"
-                        >
-                            DELETE
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </article>
-        `;
-
-    }
-
-
-    function openTeamAdminModal(
-        member = null
-    ) {
-
-        editingTeamId =
-            member?.id || null;
-
-
-        $("teamModalTitle") &&
-            (
-                $("teamModalTitle").textContent =
-                    member
-                        ? "EDIT MEMBER"
-                        : "ADD MEMBER"
-            );
-
-
-        setValue(
-            "adminTeamName",
-            member?.name || ""
-        );
-
-        setValue(
-            "adminTeamPosition",
-            member?.position || ""
-        );
-
-        setValue(
-            "adminTeamClass",
-            member?.class_name || ""
-        );
-
-        setValue(
-            "adminTeamCategory",
-            member?.category || "general"
-        );
-
-        setValue(
-            "adminTeamOrder",
-            member?.display_order ?? 0
-        );
-
-
-        if ($("adminTeamActive")) {
-
-            $("adminTeamActive").checked =
-                member?.active !== false;
-
-        }
-
-
-        if ($("adminTeamPhoto")) {
-
-            $("adminTeamPhoto").value =
-                "";
-
-        }
-
-
-        setMessage(
-            "teamAdminMessage",
-            ""
-        );
-
-
-        $("teamAdminModal")
-            ?.classList.add(
-                "active"
-            );
-
-        body.classList.add(
-            "modal-open"
-        );
-
-    }
-
-
-    function closeTeamAdminModal() {
-
-        $("teamAdminModal")
-            ?.classList.remove(
-                "active"
-            );
-
-        body.classList.remove(
-            "modal-open"
-        );
-
-        editingTeamId = null;
-
-    }
-
-
-    async function saveTeam(
-        event
-    ) {
-
-        event.preventDefault();
-
-        if (
-            !supabaseClient ||
-            !isAdmin
-        ) {
-            return;
-        }
-
-
-        const button =
-            $("saveTeamButton");
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.textContent =
-                "SAVING...";
-
-        }
-
-
-        try {
-
-            const name =
-                getValue(
-                    "adminTeamName"
-                );
-
-            const position =
-                getValue(
-                    "adminTeamPosition"
-                );
-
-            const className =
-                getValue(
-                    "adminTeamClass"
-                );
-
-            const category =
-                getValue(
-                    "adminTeamCategory"
-                ) ||
-                "general";
-
-            const order =
-                Math.max(
-                    0,
-                    Number(
-                        getValue(
-                            "adminTeamOrder"
-                        )
-                    ) || 0
-                );
-
-            const active =
-                $("adminTeamActive")
-                    ?.checked !== false;
-
-
-            if (!name) {
-
-                throw new Error(
-                    "Please enter the member name."
-                );
-
-            }
-
-            if (!position) {
-
-                throw new Error(
-                    "Please enter the member position."
-                );
-
-            }
-
-
-            let photoUrl =
-                null;
-
-
-            if (editingTeamId) {
-
-                const {
-                    data
-                } =
-                    await supabaseClient
-                        .from(
-                            "team_members"
-                        )
-                        .select(
-                            "photo_url"
-                        )
-                        .eq(
-                            "id",
-                            editingTeamId
-                        )
-                        .maybeSingle();
-
-                photoUrl =
-                    data?.photo_url ||
-                    null;
-
-            }
-
-
-            const photoInput =
-                $("adminTeamPhoto");
-
-            const photoFile =
-                photoInput?.files?.[0] ||
-                null;
-
-
-            if (photoFile) {
-
-                validateImage(
-                    photoFile,
-                    8
-                );
-
-                photoUrl =
-                    await uploadTeamPhoto(
-                        photoFile
-                    );
-
-            }
-
-
-            const payload = {
-
-                name,
-
-                position,
-
-                class_name:
-                    className ||
-                    null,
-
-                category,
-
-                display_order:
-                    order,
-
-                active,
-
-                photo_url:
-                    photoUrl
-
-            };
-
-
-            if (editingTeamId) {
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from(
-                            "team_members"
-                        )
-                        .update(
-                            payload
-                        )
-                        .eq(
-                            "id",
-                            editingTeamId
-                        );
-
-                if (error) {
-                    throw error;
-                }
-
-            } else {
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from(
-                            "team_members"
-                        )
-                        .insert(
-                            payload
-                        );
-
-                if (error) {
-                    throw error;
-                }
-
-            }
-
-
-            closeTeamAdminModal();
-
-            await loadAdminTeam();
-
-            await loadPublicTeam();
-
-            await loadDashboardData();
-
-
-            alert(
-                editingTeamId
-                    ? "TEAM MEMBER UPDATED."
-                    : "TEAM MEMBER ADDED."
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Save team error:",
-                error
-            );
-
-            showMessage(
-                "teamAdminMessage",
-                friendlyError(error),
-                true
-            );
-
-        } finally {
-
-            if (button) {
-
-                button.disabled = false;
-
-                button.textContent =
-                    "SAVE MEMBER";
-
-            }
-
-        }
-
-    }
-
-
-    async function uploadTeamPhoto(
-        file
-    ) {
-
-        const extension =
-            getFileExtension(
-                file.name
-            );
-
-        const fileName =
-            `${crypto.randomUUID()}.${extension}`;
-
-        const path =
-            `team/${fileName}`;
-
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .storage
-                .from(
-                    TEAM_BUCKET
-                )
-                .upload(
-                    path,
-                    file,
-                    {
-                        cacheControl: "3600",
-                        upsert: false,
-                        contentType: file.type
                     }
                 );
 
@@ -1753,111 +2006,14 @@ try {
         }
 
 
-        const {
-            data
-        } =
-            supabaseClient
-                .storage
-                .from(
-                    TEAM_BUCKET
-                )
-                .getPublicUrl(
-                    path
-                );
-
-
-        return data.publicUrl;
-
-    }
-
-
-    async function deleteTeamMember(
-        member
-    ) {
-
         if (
-            !supabaseClient ||
-            !isAdmin
+            !data ||
+            data.length === 0
         ) {
-            return;
-        }
 
-
-        const confirmed =
-            window.confirm(
-                `Delete ${
-                    member.name ||
-                    "this member"
-                }?`
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        try {
-
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from(
-                        "team_members"
-                    )
-                    .delete()
-                    .eq(
-                        "id",
-                        member.id
-                    );
-
-            if (error) {
-                throw error;
-            }
-
-
-            await loadAdminTeam();
-
-            await loadPublicTeam();
-
-            await loadDashboardData();
-
-        } catch (error) {
-
-            console.error(
-                "Delete team error:",
-                error
-            );
-
-            alert(
-                friendlyError(error)
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       PUBLIC TEAM
-    ===================================================== */
-
-    async function loadPublicTeam() {
-
-        const teamGrid =
-            $("publicTeamGrid");
-
-        if (!teamGrid) {
-            return;
-        }
-
-
-        if (!supabaseClient) {
-
-            teamGrid.innerHTML =
-                `<div class="team-loading">
-                    TEAM DATA UNAVAILABLE.
+            container.innerHTML =
+                `<div class="admin-empty">
+                    NO TEAM MEMBERS YET.
                 </div>`;
 
             return;
@@ -1865,441 +2021,1079 @@ try {
         }
 
 
-        teamGrid.innerHTML =
-            `<div class="team-loading">
-                LOADING TEAM...
-            </div>`;
+        container.innerHTML = "";
 
 
-        try {
+        data.forEach(
+            member => {
 
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from(
-                        "team_members"
-                    )
-                    .select(`
-                        id,
-                        name,
-                        position,
-                        class_name,
-                        category,
-                        photo_url,
-                        display_order,
-                        active
-                    `)
-                    .eq(
-                        "active",
-                        true
-                    )
-                    .order(
-                        "display_order",
-                        {
-                            ascending: true
-                        }
+                const item =
+                    document.createElement(
+                        "div"
                     );
 
-
-            if (error) {
-                throw error;
-            }
+                item.className =
+                    "admin-data-item";
 
 
-            if (
-                !data ||
-                data.length === 0
-            ) {
-
-                teamGrid.innerHTML =
-                    `<div class="team-loading">
-                        TEAM WILL BE UPDATED SOON.
-                    </div>`;
-
-                return;
-
-            }
+                const photoHTML =
+                    member.photo_url
+                        ? `<img
+                            src="${escapeHTML(member.photo_url)}"
+                            alt="${escapeHTML(member.name)}"
+                          >`
+                        : `<div class="admin-item-placeholder">
+                            SN
+                          </div>`;
 
 
-            teamGrid.innerHTML = "";
+                item.innerHTML = `
+                    <div class="admin-data-item-main">
 
-
-            data.forEach(
-                member => {
-
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
-
-                    card.className =
-                        "team-member";
-
-
-                    const photoHTML =
-                        member.photo_url
-                            ? `
-                                <img
-                                    src="${escapeAttribute(
-                                        member.photo_url
-                                    )}"
-                                    alt="${escapeAttribute(
-                                        member.name ||
-                                        "SYNTHENOVA member"
-                                    )}"
-                                    loading="lazy"
-                                >
-                            `
-                            : `
-                                <div class="team-no-photo">
-                                    SN
-                                </div>
-                            `;
-
-
-                    card.innerHTML = `
-
-                        <div class="team-photo">
-
+                        <div class="admin-item-photo">
                             ${photoHTML}
-
-                            <div class="team-photo-overlay">
-                                VIEW
-                            </div>
-
                         </div>
 
-                        <div class="team-info">
+                        <div class="admin-item-info">
 
-                            <span class="team-position">
-                                ${escapeHTML(
-                                    member.position ||
-                                    "MEMBER"
-                                )}
+                            <strong>
+                                ${escapeHTML(member.name)}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(member.position)}
                             </span>
-
-                            <h3>
-                                ${escapeHTML(
-                                    member.name ||
-                                    "SYNTHENOVA MEMBER"
-                                )}
-                            </h3>
 
                             ${
                                 member.class_name
-                                    ? `
-                                        <p>
-                                            ${escapeHTML(
-                                                member.class_name
-                                            )}
-                                        </p>
-                                    `
+                                    ? `<small>
+                                        ${escapeHTML(member.class_name)}
+                                      </small>`
                                     : ""
                             }
 
+                            <small>
+                                ${escapeHTML(member.category || "general")}
+                                ·
+                                ${member.active ? "ACTIVE" : "HIDDEN"}
+                            </small>
+
                         </div>
-                    `;
+
+                    </div>
+
+                    <div class="admin-data-item-actions">
+
+                        <button
+                            type="button"
+                            class="admin-secondary-button edit-team-button"
+                        >
+                            EDIT
+                        </button>
+
+                        <button
+                            type="button"
+                            class="admin-danger-button delete-team-button"
+                        >
+                            DELETE
+                        </button>
+
+                    </div>
+                `;
 
 
-                    card.addEventListener(
-                        "click",
-                        () =>
-                            openTeamProfile(
-                                member
-                            )
+                const editButton =
+                    item.querySelector(
+                        ".edit-team-button"
+                    );
+
+                const deleteButton =
+                    item.querySelector(
+                        ".delete-team-button"
                     );
 
 
-                    teamGrid.appendChild(
-                        card
-                    );
+                editButton?.addEventListener(
+                    "click",
+                    () => {
 
-                }
-            );
+                        openTeamAdminModal(
+                            member
+                        );
 
-        } catch (error) {
+                    }
+                );
 
-            console.error(
-                "Public team error:",
-                error
-            );
+
+                deleteButton?.addEventListener(
+                    "click",
+                    async () => {
+
+                        await deleteTeamMember(
+                            member
+                        );
+
+                    }
+                );
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Load admin team error:",
+            error
+        );
+
+        container.innerHTML =
+            `<div class="admin-empty">
+                UNABLE TO LOAD TEAM.
+            </div>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE TEAM MEMBER
+========================================================= */
+
+async function deleteTeamMember(
+    member
+) {
+
+    if (
+        !supabaseClient ||
+        !isAdmin ||
+        !member?.id
+    ) {
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            `Delete ${member.name || "this team member"}?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("team_members")
+                .delete()
+                .eq(
+                    "id",
+                    member.id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadAdminTeam();
+
+        await loadPublicTeam();
+
+        await updateAdminCounts();
+
+
+    } catch (error) {
+
+        console.error(
+            "Delete team member error:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "UNABLE TO DELETE TEAM MEMBER."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PUBLIC TEAM
+========================================================= */
+
+async function loadPublicTeam() {
+
+    const teamGrid =
+        $("publicTeamGrid");
+
+    if (!teamGrid) {
+        return;
+    }
+
+
+    if (!supabaseClient) {
+
+        teamGrid.innerHTML =
+            `<div class="team-loading">
+                TEAM DATA UNAVAILABLE.
+            </div>`;
+
+        return;
+
+    }
+
+
+    teamGrid.innerHTML =
+        `<div class="team-loading">
+            LOADING TEAM...
+        </div>`;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("team_members")
+                .select(`
+                    id,
+                    name,
+                    position,
+                    class_name,
+                    category,
+                    photo_url,
+                    display_order,
+                    active
+                `)
+                .eq(
+                    "active",
+                    true
+                )
+                .order(
+                    "display_order",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
 
             teamGrid.innerHTML =
                 `<div class="team-loading">
-                    UNABLE TO LOAD TEAM.
+                    TEAM WILL BE UPDATED SOON.
                 </div>`;
+
+            return;
+
+        }
+
+
+        teamGrid.innerHTML = "";
+
+
+        data.forEach(
+            member => {
+
+                const card =
+                    document.createElement(
+                        "article"
+                    );
+
+                card.className =
+                    "team-member";
+
+                card.dataset.id =
+                    member.id || "";
+
+
+                const photoHTML =
+                    member.photo_url
+                        ? `<img
+                            src="${escapeHTML(member.photo_url)}"
+                            alt="${escapeHTML(member.name || "SYNTHENOVA member")}"
+                            loading="lazy"
+                          >`
+                        : `<div class="team-no-photo">
+                            SN
+                          </div>`;
+
+
+                card.innerHTML = `
+                    <div class="team-photo">
+
+                        ${photoHTML}
+
+                        <div class="team-photo-overlay">
+                            VIEW
+                        </div>
+
+                    </div>
+
+                    <div class="team-info">
+
+                        <span class="team-position">
+                            ${escapeHTML(
+                                member.position ||
+                                "MEMBER"
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                member.name ||
+                                "SYNTHENOVA MEMBER"
+                            )}
+                        </h3>
+
+                        ${
+                            member.class_name
+                                ? `<p>
+                                    ${escapeHTML(
+                                        member.class_name
+                                    )}
+                                  </p>`
+                                : ""
+                        }
+
+                    </div>
+                `;
+
+
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        openTeamProfile(
+                            member
+                        );
+
+                    }
+                );
+
+
+                teamGrid.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Public team error:",
+            error
+        );
+
+        teamGrid.innerHTML =
+            `<div class="team-loading">
+                UNABLE TO LOAD TEAM.
+            </div>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   TEAM PROFILE
+========================================================= */
+
+function openTeamProfile(
+    member
+) {
+
+    const profile =
+        $("teamProfile");
+
+    if (!profile) {
+        return;
+    }
+
+
+    const image =
+        $("profileImage");
+
+    const role =
+        $("profileRole");
+
+    const name =
+        $("profileName");
+
+    const className =
+        $("profileClass");
+
+    const category =
+        $("profileCategory");
+
+
+    if (image) {
+
+        if (member.photo_url) {
+
+            image.style.backgroundImage =
+                `url("${member.photo_url}")`;
+
+            image.style.backgroundSize =
+                "cover";
+
+            image.style.backgroundPosition =
+                "center";
+
+        } else {
+
+            image.style.backgroundImage =
+                "none";
 
         }
 
     }
 
 
-    function openTeamProfile(
-        member
-    ) {
+    if (role) {
 
-        const profile =
-            $("teamProfile");
+        role.textContent =
+            member.position ||
+            "SYNTHENOVA TEAM";
 
-        if (!profile) {
-            return;
-        }
+    }
 
 
-        const image =
-            $("profileImage");
+    if (name) {
 
-        const role =
-            $("profileRole");
+        name.textContent =
+            member.name ||
+            "SYNTHENOVA MEMBER";
 
-        const name =
-            $("profileName");
-
-        const className =
-            $("profileClass");
-
-        const category =
-            $("profileCategory");
+    }
 
 
-        if (image) {
+    if (className) {
+
+        className.textContent =
+            member.class_name ||
+            "SYNTHENOVA";
+
+    }
+
+
+    if (category) {
+
+        category.textContent =
+            member.category ||
+            "GENERAL";
+
+    }
+
+
+    profile.classList.add(
+        "active"
+    );
+
+    body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+function closeTeamProfile() {
+
+    const profile =
+        $("teamProfile");
+
+    if (profile) {
+
+        profile.classList.remove(
+            "active"
+        );
+
+    }
+
+    body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+$("closeTeamProfile")
+    ?.addEventListener(
+        "click",
+        closeTeamProfile
+    );
+
+
+$("teamProfile")
+    ?.addEventListener(
+        "click",
+        event => {
+
+            const profile =
+                $("teamProfile");
 
             if (
-                member.photo_url
+                event.target ===
+                profile
             ) {
 
-                image.style.backgroundImage =
-                    `url("${member.photo_url}")`;
-
-                image.style.backgroundSize =
-                    "cover";
-
-                image.style.backgroundPosition =
-                    "center";
-
-            } else {
-
-                image.style.backgroundImage =
-                    "none";
+                closeTeamProfile();
 
             }
 
         }
+    );
 
 
-        if (role) {
+/* =========================================================
+   EVENTS ADMIN FORM
+========================================================= */
 
-            role.textContent =
-                member.position ||
-                "SYNTHENOVA TEAM";
+function setupEventAdminForm() {
 
-        }
+    const form =
+        $("eventAdminForm");
 
+    const modal =
+        $("eventAdminModal");
 
-        if (name) {
-
-            name.textContent =
-                member.name ||
-                "SYNTHENOVA MEMBER";
-
-        }
+    const closeButton =
+        $("closeEventAdmin");
 
 
-        if (className) {
+    if (closeButton) {
 
-            className.textContent =
-                member.class_name ||
-                "SYNTHENOVA";
-
-        }
-
-
-        if (category) {
-
-            category.textContent =
-                member.category ||
-                "GENERAL";
-
-        }
-
-
-        profile.classList.add(
-            "active"
-        );
-
-        body.classList.add(
-            "modal-open"
-        );
-
-    }
-
-
-    function closeTeamProfile() {
-
-        $("teamProfile")
-            ?.classList.remove(
-                "active"
-            );
-
-        body.classList.remove(
-            "modal-open"
-        );
-
-    }
-
-
-    $("closeTeamProfile")
-        ?.addEventListener(
+        closeButton.addEventListener(
             "click",
-            closeTeamProfile
+            () => {
+
+                closeEventAdminModal();
+
+            }
         );
 
+    }
 
-    $("teamProfile")
-        ?.addEventListener(
+
+    if (modal) {
+
+        modal.addEventListener(
             "click",
             event => {
 
                 if (
                     event.target ===
-                    $("teamProfile")
+                    modal
                 ) {
 
-                    closeTeamProfile();
+                    closeEventAdminModal();
 
                 }
 
             }
         );
 
-
-    /* =====================================================
-       EVENTS ADMIN
-    ===================================================== */
-
-    function openEventAdminModal(
-        eventData = null
-    ) {
-
-        editingEventId =
-            eventData?.id ||
-            null;
+    }
 
 
-        if ($("eventModalTitle")) {
+    if (!form) {
+        return;
+    }
 
-            $("eventModalTitle").textContent =
-                eventData
-                    ? "EDIT EVENT"
-                    : "ADD EVENT";
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            await saveEvent();
 
         }
+    );
+
+}
 
 
-        setValue(
-            "adminEventTitle",
-            eventData?.title || ""
-        );
+/* =========================================================
+   OPEN EVENT ADMIN MODAL
+========================================================= */
 
-        setValue(
-            "adminEventDate",
-            eventData?.event_date || ""
-        );
+function openEventAdminModal(
+    eventData = null
+) {
 
-        setValue(
-            "adminEventDescription",
-            eventData?.description || ""
-        );
+    const modal =
+        $("eventAdminModal");
+
+    const form =
+        $("eventAdminForm");
+
+    if (!modal || !form) {
+        return;
+    }
 
 
-        /*
-         * GOOGLE FORM REGISTRATION LINK
-         */
+    editingEventId =
+        eventData?.id || null;
 
-        setValue(
-            "adminEventRegistration",
+
+    const title =
+        $("adminEventTitle");
+
+    const date =
+        $("adminEventDate");
+
+    const description =
+        $("adminEventDescription");
+
+    const registration =
+        $("adminEventRegistration");
+
+    const poster =
+        $("adminEventPoster");
+
+    const order =
+        $("adminEventOrder");
+
+    const published =
+        $("adminEventPublished");
+
+    const message =
+        $("eventAdminMessage");
+
+
+    if (title) {
+
+        title.value =
+            eventData?.title || "";
+
+    }
+
+
+    if (date) {
+
+        date.value =
+            eventData?.event_date ||
+            eventData?.date ||
+            "";
+
+    }
+
+
+    if (description) {
+
+        description.value =
+            eventData?.description || "";
+
+    }
+
+
+    if (registration) {
+
+        registration.value =
             eventData?.registration_url ||
-            ""
-        );
-
-
-        setValue(
-            "adminEventOrder",
-            eventData?.display_order ?? 0
-        );
-
-
-        if ($("adminEventPublished")) {
-
-            $("adminEventPublished").checked =
-                eventData?.published !== false;
-
-        }
-
-
-        if ($("adminEventPoster")) {
-
-            $("adminEventPoster").value =
-                "";
-
-        }
-
-
-        showMessage(
-            "eventAdminMessage",
-            ""
-        );
-
-
-        $("eventAdminModal")
-            ?.classList.add(
-                "active"
-            );
-
-        body.classList.add(
-            "modal-open"
-        );
+            "";
 
     }
 
 
-    function closeEventAdminModal() {
+    if (poster) {
 
-        $("eventAdminModal")
-            ?.classList.remove(
-                "active"
-            );
-
-        body.classList.remove(
-            "modal-open"
-        );
-
-        editingEventId = null;
+        poster.value = "";
 
     }
 
 
-    async function loadAdminEvents() {
+    if (order) {
 
-        const list =
-            $("adminEventsList");
+        order.value =
+            eventData?.display_order ??
+            0;
+
+    }
+
+
+    if (published) {
+
+        published.checked =
+            eventData
+                ? eventData.published !== false
+                : true;
+
+    }
+
+
+    if (message) {
+
+        message.textContent = "";
+
+    }
+
+
+    const modalTitle =
+        modal.querySelector(
+            ".admin-modal-title"
+        );
+
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            eventData
+                ? "EDIT EVENT"
+                : "ADD EVENT";
+
+    }
+
+
+    modal.classList.add(
+        "active"
+    );
+
+    body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE EVENT ADMIN MODAL
+========================================================= */
+
+function closeEventAdminModal() {
+
+    const modal =
+        $("eventAdminModal");
+
+    if (modal) {
+
+        modal.classList.remove(
+            "active"
+        );
+
+    }
+
+    body.classList.remove(
+        "modal-open"
+    );
+
+    editingEventId = null;
+
+}
+
+
+/* =========================================================
+   SAVE EVENT
+========================================================= */
+
+async function saveEvent() {
+
+    if (
+        !supabaseClient ||
+        !isAdmin
+    ) {
+        return;
+    }
+
+
+    const title =
+        $("adminEventTitle")
+            ?.value
+            ?.trim();
+
+    const eventDate =
+        $("adminEventDate")
+            ?.value
+            ?.trim();
+
+    const description =
+        $("adminEventDescription")
+            ?.value
+            ?.trim();
+
+    const registrationURL =
+        $("adminEventRegistration")
+            ?.value
+            ?.trim();
+
+    const posterInput =
+        $("adminEventPoster");
+
+    const displayOrder =
+        Number(
+            $("adminEventOrder")
+                ?.value
+        ) || 0;
+
+    const published =
+        $("adminEventPublished")
+            ?.checked !== false;
+
+    const message =
+        $("eventAdminMessage");
+
+    const saveButton =
+        $("saveEventButton");
+
+
+    if (!title || !eventDate) {
+
+        if (message) {
+
+            message.textContent =
+                "EVENT TITLE AND DATE ARE REQUIRED.";
+
+        }
+
+        return;
+
+    }
+
+
+    if (saveButton) {
+
+        saveButton.disabled = true;
+
+        saveButton.textContent =
+            "SAVING...";
+
+    }
+
+
+    try {
+
+        let posterURL = null;
+
+
+        if (editingEventId) {
+
+            const {
+                data: existingEvent
+            } =
+                await supabaseClient
+                    .from("events")
+                    .select("poster_url")
+                    .eq(
+                        "id",
+                        editingEventId
+                    )
+                    .maybeSingle();
+
+            posterURL =
+                existingEvent?.poster_url ||
+                null;
+
+        }
+
 
         if (
-            !list ||
-            !supabaseClient ||
-            !isAdmin
+            posterInput &&
+            posterInput.files &&
+            posterInput.files.length > 0
         ) {
-            return;
+
+            const file =
+                posterInput.files[0];
+
+            const reader =
+                new FileReader();
+
+
+            posterURL =
+                await new Promise(
+                    (
+                        resolve,
+                        reject
+                    ) => {
+
+                        reader.onload =
+                            () => resolve(
+                                reader.result
+                            );
+
+                        reader.onerror =
+                            () => reject(
+                                new Error(
+                                    "Unable to read event poster."
+                                )
+                            );
+
+                        reader.readAsDataURL(
+                            file
+                        );
+
+                    }
+                );
+
         }
 
 
-        list.innerHTML =
-            `<div class="admin-loading">
-                LOADING EVENTS...
+        const eventPayload = {
+            title,
+            event_date:
+                eventDate,
+            description:
+                description ||
+                null,
+            registration_url:
+                registrationURL ||
+                null,
+            poster_url:
+                posterURL,
+            display_order:
+                displayOrder,
+            published
+        };
+
+
+        if (editingEventId) {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("events")
+                    .update(
+                        eventPayload
+                    )
+                    .eq(
+                        "id",
+                        editingEventId
+                    );
+
+            if (error) {
+                throw error;
+            }
+
+        } else {
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("events")
+                    .insert(
+                        eventPayload
+                    );
+
+            if (error) {
+                throw error;
+            }
+
+        }
+
+
+        if (message) {
+
+            message.textContent =
+                "EVENT SAVED SUCCESSFULLY.";
+
+        }
+
+
+        closeEventAdminModal();
+
+        await loadAdminEvents();
+
+        await loadPublicEvents();
+
+        await updateAdminCounts();
+
+
+    } catch (error) {
+
+        console.error(
+            "Save event error:",
+            error
+        );
+
+        if (message) {
+
+            message.textContent =
+                error.message ||
+                "UNABLE TO SAVE EVENT.";
+
+        }
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                "SAVE EVENT";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD ADMIN EVENTS
+========================================================= */
+
+async function loadAdminEvents() {
+
+    const container =
+        $("adminEventsList");
+
+    if (!container) {
+        return;
+    }
+
+
+    if (!supabaseClient) {
+
+        container.innerHTML =
+            `<div class="admin-empty">
+                SUPABASE UNAVAILABLE.
             </div>`;
 
+        return;
+
+    }
+
+
+    container.innerHTML =
+        `<div class="admin-loading">
+            LOADING EVENTS...
+        </div>`;
+
+
+    try {
 
         const {
             data,
@@ -2313,29 +3107,11 @@ try {
                     {
                         ascending: true
                     }
-                )
-                .order(
-                    "event_date",
-                    {
-                        ascending: true
-                    }
                 );
 
 
         if (error) {
-
-            console.error(
-                "Events loading error:",
-                error
-            );
-
-            list.innerHTML =
-                `<div class="admin-empty">
-                    FAILED TO LOAD EVENTS.
-                </div>`;
-
-            return;
-
+            throw error;
         }
 
 
@@ -2344,7 +3120,7 @@ try {
             data.length === 0
         ) {
 
-            list.innerHTML =
+            container.innerHTML =
                 `<div class="admin-empty">
                     NO EVENTS YET.
                 </div>`;
@@ -2354,540 +3130,781 @@ try {
         }
 
 
-        list.innerHTML =
-            data
-                .map(
-                    eventData =>
-                        createAdminEventCard(
-                            eventData
-                        )
-                )
-                .join("");
+        container.innerHTML = "";
 
 
-        list
-            .querySelectorAll(
-                "[data-edit-event]"
-            )
-            .forEach(button => {
+        data.forEach(
+            eventData => {
 
-                button.addEventListener(
-                    "click",
-                    () => {
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
-                        const item =
-                            data.find(
-                                eventData =>
-                                    eventData.id ===
-                                    button.dataset.editEvent
-                            );
-
-                        if (item) {
-
-                            openEventAdminModal(
-                                item
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
+                item.className =
+                    "admin-data-item";
 
 
-        list
-            .querySelectorAll(
-                "[data-delete-event]"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const item =
-                            data.find(
-                                eventData =>
-                                    eventData.id ===
-                                    button.dataset.deleteEvent
-                            );
-
-                        if (item) {
-
-                            deleteEvent(
-                                item
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
-
-    }
-
-
-    function createAdminEventCard(
-        eventData
-    ) {
-
-        const registration =
-            eventData.registration_url
-                ? "GOOGLE FORM CONNECTED"
-                : "NO REGISTRATION LINK";
-
-
-        return `
-            <article class="admin-data-card">
-
-                ${
+                const posterHTML =
                     eventData.poster_url
-                        ? `
-                            <div class="admin-data-image">
-                                <img
-                                    src="${escapeAttribute(
-                                        eventData.poster_url
-                                    )}"
-                                    alt="${escapeAttribute(
-                                        eventData.title
-                                    )}"
-                                >
-                            </div>
-                        `
-                        : ""
-                }
+                        ? `<img
+                            src="${escapeHTML(eventData.poster_url)}"
+                            alt="${escapeHTML(eventData.title || "Event")}"
+                          >`
+                        : `<div class="admin-item-placeholder">
+                            EVENT
+                          </div>`;
 
-                <div class="admin-data-content">
 
-                    <h3>
-                        ${escapeHTML(
-                            eventData.title ||
-                            "EVENT"
-                        )}
-                    </h3>
+                item.innerHTML = `
+                    <div class="admin-data-item-main">
 
-                    <p>
-                        ${escapeHTML(
-                            eventData.event_date ||
-                            ""
-                        )}
-                    </p>
+                        <div class="admin-item-photo">
+                            ${posterHTML}
+                        </div>
 
-                    <small>
-                        ${escapeHTML(
-                            eventData.description ||
-                            ""
-                        )}
-                    </small>
+                        <div class="admin-item-info">
 
-                    <div class="admin-card-meta">
-                        ${
-                            eventData.published
-                                ? "PUBLISHED"
-                                : "HIDDEN"
-                        }
-                        ·
-                        ${registration}
+                            <strong>
+                                ${escapeHTML(
+                                    eventData.title ||
+                                    "UNTITLED EVENT"
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(
+                                    eventData.event_date ||
+                                    ""
+                                )}
+                            </span>
+
+                            <small>
+                                ${
+                                    eventData.published
+                                        ? "PUBLISHED"
+                                        : "HIDDEN"
+                                }
+                            </small>
+
+                            ${
+                                eventData.registration_url
+                                    ? `<small>
+                                        GOOGLE FORM CONNECTED
+                                      </small>`
+                                    : `<small>
+                                        NO REGISTRATION LINK
+                                      </small>`
+                            }
+
+                        </div>
+
                     </div>
 
-                    <div class="admin-card-actions">
+                    <div class="admin-data-item-actions">
 
                         <button
                             type="button"
-                            class="admin-secondary-button"
-                            data-edit-event="${escapeAttribute(
-                                eventData.id
-                            )}"
+                            class="admin-secondary-button edit-event-button"
                         >
                             EDIT
                         </button>
 
                         <button
                             type="button"
-                            class="admin-danger-button"
-                            data-delete-event="${escapeAttribute(
-                                eventData.id
-                            )}"
+                            class="admin-danger-button delete-event-button"
                         >
                             DELETE
                         </button>
 
                     </div>
+                `;
 
-                </div>
 
-            </article>
-        `;
+                item.querySelector(
+                    ".edit-event-button"
+                )?.addEventListener(
+                    "click",
+                    () => {
+
+                        openEventAdminModal(
+                            eventData
+                        );
+
+                    }
+                );
+
+
+                item.querySelector(
+                    ".delete-event-button"
+                )?.addEventListener(
+                    "click",
+                    async () => {
+
+                        await deleteEvent(
+                            eventData
+                        );
+
+                    }
+                );
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Load admin events error:",
+            error
+        );
+
+        container.innerHTML =
+            `<div class="admin-empty">
+                UNABLE TO LOAD EVENTS.
+            </div>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE EVENT
+========================================================= */
+
+async function deleteEvent(
+    eventData
+) {
+
+    if (
+        !supabaseClient ||
+        !isAdmin ||
+        !eventData?.id
+    ) {
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            `Delete ${eventData.title || "this event"}?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("events")
+                .delete()
+                .eq(
+                    "id",
+                    eventData.id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadAdminEvents();
+
+        await loadPublicEvents();
+
+        await updateAdminCounts();
+
+
+    } catch (error) {
+
+        console.error(
+            "Delete event error:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "UNABLE TO DELETE EVENT."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PUBLIC EVENTS
+========================================================= */
+
+async function loadPublicEvents() {
+
+    const eventsContainer =
+        $("publicEventsGrid") ||
+        $("eventsGrid") ||
+        $("eventsContainer");
+
+    if (!eventsContainer) {
+        return;
+    }
+
+
+    if (!supabaseClient) {
+
+        eventsContainer.innerHTML =
+            `<div class="events-loading">
+                EVENT DATA UNAVAILABLE.
+            </div>`;
+
+        return;
 
     }
 
 
-    async function saveEvent(
-        event
-    ) {
+    eventsContainer.innerHTML =
+        `<div class="events-loading">
+            LOADING EVENTS...
+        </div>`;
 
-        event.preventDefault();
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("events")
+                .select(`
+                    id,
+                    title,
+                    event_date,
+                    description,
+                    poster_url,
+                    registration_url,
+                    display_order,
+                    published
+                `)
+                .eq(
+                    "published",
+                    true
+                )
+                .order(
+                    "display_order",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
 
         if (
-            !supabaseClient ||
-            !isAdmin
+            !data ||
+            data.length === 0
         ) {
+
+            eventsContainer.innerHTML =
+                `<div class="events-loading">
+                    NO EVENTS AVAILABLE.
+                </div>`;
+
             return;
-        }
-
-
-        const button =
-            $("saveEventButton");
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.textContent =
-                "SAVING...";
 
         }
 
 
-        try {
-
-            const title =
-                getValue(
-                    "adminEventTitle"
-                );
-
-            const eventDate =
-                getValue(
-                    "adminEventDate"
-                );
-
-            const description =
-                getValue(
-                    "adminEventDescription"
-                );
+        eventsContainer.innerHTML = "";
 
 
-            /*
-             * GOOGLE FORM LINK
-             */
+        data.forEach(
+            eventData => {
 
-            const registrationUrl =
-                getValue(
-                    "adminEventRegistration"
-                );
+                const card =
+                    document.createElement(
+                        "article"
+                    );
 
-
-            const order =
-                Math.max(
-                    0,
-                    Number(
-                        getValue(
-                            "adminEventOrder"
-                        )
-                    ) || 0
-                );
+                card.className =
+                    "event-card";
 
 
-            const published =
-                $("adminEventPublished")
-                    ?.checked !== false;
+                const posterHTML =
+                    eventData.poster_url
+                        ? `<img
+                            class="event-poster"
+                            src="${escapeHTML(eventData.poster_url)}"
+                            alt="${escapeHTML(eventData.title || "SYNTHENOVA event")}"
+                            loading="lazy"
+                          >`
+                        : `<div class="event-poster event-poster-placeholder">
+                            SYNTHENOVA
+                          </div>`;
 
 
-            if (!title) {
+                const registerButton =
+                    eventData.registration_url
+                        ? `
+                            <a
+                                class="event-register-button"
+                                href="${escapeHTML(eventData.registration_url)}"
+                                rel="noopener noreferrer"
+                            >
+                                REGISTER NOW
+                                <span>↗</span>
+                            </a>
+                          `
+                        : "";
 
-                throw new Error(
-                    "Please enter an event title."
+
+                card.innerHTML = `
+                    <div class="event-card-media">
+                        ${posterHTML}
+                    </div>
+
+                    <div class="event-card-content">
+
+                        <span class="event-date">
+                            ${escapeHTML(
+                                eventData.event_date ||
+                                ""
+                            )}
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(
+                                eventData.title ||
+                                "SYNTHENOVA EVENT"
+                            )}
+                        </h3>
+
+                        ${
+                            eventData.description
+                                ? `<p>
+                                    ${escapeHTML(
+                                        eventData.description
+                                    )}
+                                  </p>`
+                                : ""
+                        }
+
+                        ${
+                            registerButton
+                                ? `<div class="event-card-actions">
+                                    ${registerButton}
+                                  </div>`
+                                : ""
+                        }
+
+                    </div>
+                `;
+
+
+                eventsContainer.appendChild(
+                    card
                 );
 
             }
+        );
 
 
-            let posterUrl =
-                null;
+    } catch (error) {
+
+        console.error(
+            "Public events error:",
+            error
+        );
+
+        eventsContainer.innerHTML =
+            `<div class="events-loading">
+                UNABLE TO LOAD EVENTS.
+            </div>`;
+
+    }
+
+}
 
 
-            if (editingEventId) {
+/* =========================================================
+   GALLERY ADMIN FORM
+========================================================= */
 
-                const {
-                    data
-                } =
-                    await supabaseClient
-                        .from("events")
-                        .select(
-                            "poster_url"
-                        )
-                        .eq(
-                            "id",
-                            editingEventId
-                        )
-                        .maybeSingle();
+function setupGalleryAdminForm() {
 
-                posterUrl =
-                    data?.poster_url ||
-                    null;
+    const form =
+        $("galleryAdminForm");
+
+    const modal =
+        $("galleryAdminModal");
+
+    const closeButton =
+        $("closeGalleryAdmin");
+
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            () => {
+
+                closeGalleryAdminModal();
+
+            }
+        );
+
+    }
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    closeGalleryAdminModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (!form) {
+        return;
+    }
+
+
+    form.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+            await saveGallery();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OPEN GALLERY ADMIN MODAL
+========================================================= */
+
+function openGalleryAdminModal(
+    galleryData = null
+) {
+
+    const modal =
+        $("galleryAdminModal");
+
+    const form =
+        $("galleryAdminForm");
+
+    if (!modal || !form) {
+        return;
+    }
+
+
+    editingGalleryId =
+        galleryData?.id || null;
+
+
+    const imageInput =
+        $("adminGalleryImage");
+
+    const caption =
+        $("adminGalleryCaption");
+
+    const order =
+        $("adminGalleryOrder");
+
+    const published =
+        $("adminGalleryPublished");
+
+    const message =
+        $("galleryAdminMessage");
+
+
+    if (imageInput) {
+
+        imageInput.value = "";
+
+        if (galleryData) {
+
+            imageInput.removeAttribute(
+                "multiple"
+            );
+
+        } else {
+
+            imageInput.setAttribute(
+                "multiple",
+                "multiple"
+            );
+
+        }
+
+    }
+
+
+    if (caption) {
+
+        caption.value =
+            galleryData?.caption ||
+            "";
+
+    }
+
+
+    if (order) {
+
+        order.value =
+            galleryData?.display_order ??
+            0;
+
+    }
+
+
+    if (published) {
+
+        published.checked =
+            galleryData
+                ? galleryData.published !== false
+                : true;
+
+    }
+
+
+    if (message) {
+
+        message.textContent = "";
+
+    }
+
+
+    const modalTitle =
+        modal.querySelector(
+            ".admin-modal-title"
+        );
+
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            galleryData
+                ? "EDIT GALLERY IMAGE"
+                : "ADD GALLERY IMAGES";
+
+    }
+
+
+    modal.classList.add(
+        "active"
+    );
+
+    body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE GALLERY ADMIN MODAL
+========================================================= */
+
+function closeGalleryAdminModal() {
+
+    const modal =
+        $("galleryAdminModal");
+
+    if (modal) {
+
+        modal.classList.remove(
+            "active"
+        );
+
+    }
+
+    body.classList.remove(
+        "modal-open"
+    );
+
+    editingGalleryId = null;
+
+}
+
+
+/* =========================================================
+   SAVE GALLERY
+========================================================= */
+
+async function saveGallery() {
+
+    if (
+        !supabaseClient ||
+        !isAdmin
+    ) {
+        return;
+    }
+
+
+    const imageInput =
+        $("adminGalleryImage");
+
+    const caption =
+        $("adminGalleryCaption")
+            ?.value
+            ?.trim();
+
+    const baseOrder =
+        Number(
+            $("adminGalleryOrder")
+                ?.value
+        ) || 0;
+
+    const published =
+        $("adminGalleryPublished")
+            ?.checked !== false;
+
+    const message =
+        $("galleryAdminMessage");
+
+    const saveButton =
+        $("saveGalleryButton");
+
+
+    if (
+        !imageInput ||
+        !imageInput.files ||
+        imageInput.files.length === 0
+    ) {
+
+        if (
+            !editingGalleryId
+        ) {
+
+            if (message) {
+
+                message.textContent =
+                    "PLEASE SELECT IMAGE FILES.";
 
             }
 
+            return;
 
-            const posterInput =
-                $("adminEventPoster");
+        }
 
-            const posterFile =
-                posterInput?.files?.[0] ||
-                null;
+    }
 
 
-            if (posterFile) {
+    if (saveButton) {
 
-                validateImage(
-                    posterFile,
-                    8
-                );
+        saveButton.disabled = true;
 
-                posterUrl =
-                    await fileToDataURL(
-                        posterFile
+        saveButton.textContent =
+            "UPLOADING...";
+
+    }
+
+
+    try {
+
+        if (editingGalleryId) {
+
+            const file =
+                imageInput.files[0];
+
+
+            let imageURL = null;
+
+
+            if (file) {
+
+                const reader =
+                    new FileReader();
+
+
+                imageURL =
+                    await new Promise(
+                        (
+                            resolve,
+                            reject
+                        ) => {
+
+                            reader.onload =
+                                () => resolve(
+                                    reader.result
+                                );
+
+                            reader.onerror =
+                                () => reject(
+                                    new Error(
+                                        "Unable to read image."
+                                    )
+                                );
+
+                            reader.readAsDataURL(
+                                file
+                            );
+
+                        }
                     );
 
             }
 
 
-            const payload = {
-
-                title,
-
-                event_date:
-                    eventDate ||
+            const galleryPayload = {
+                ...(imageURL
+                    ? {
+                        image_url:
+                            imageURL
+                    }
+                    : {}),
+                caption:
+                    caption ||
                     null,
-
-                description:
-                    description ||
-                    null,
-
-                registration_url:
-                    registrationUrl ||
-                    null,
-
-                poster_url:
-                    posterUrl,
-
                 display_order:
-                    order,
-
+                    baseOrder,
                 published
-
             };
 
 
-            if (editingEventId) {
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from("events")
-                        .update(
-                            payload
-                        )
-                        .eq(
-                            "id",
-                            editingEventId
-                        );
-
-                if (error) {
-                    throw error;
-                }
-
-            } else {
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from("events")
-                        .insert(
-                            payload
-                        );
-
-                if (error) {
-                    throw error;
-                }
-
-            }
-
-
-            closeEventAdminModal();
-
-            await loadAdminEvents();
-
-            await loadPublicEvents();
-
-            await loadDashboardData();
-
-
-            alert(
-                editingEventId
-                    ? "EVENT UPDATED."
-                    : "EVENT ADDED."
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Save event error:",
-                error
-            );
-
-            showMessage(
-                "eventAdminMessage",
-                friendlyError(error),
-                true
-            );
-
-        } finally {
-
-            if (button) {
-
-                button.disabled = false;
-
-                button.textContent =
-                    "SAVE EVENT";
-
-            }
-
-        }
-
-    }
-
-
-    async function deleteEvent(
-        eventData
-    ) {
-
-        const confirmed =
-            window.confirm(
-                `Delete ${
-                    eventData.title ||
-                    "this event"
-                }?`
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        try {
-
             const {
                 error
             } =
                 await supabaseClient
-                    .from("events")
-                    .delete()
+                    .from("gallery")
+                    .update(
+                        galleryPayload
+                    )
                     .eq(
                         "id",
-                        eventData.id
-                    );
-
-            if (error) {
-                throw error;
-            }
-
-
-            await loadAdminEvents();
-
-            await loadPublicEvents();
-
-            await loadDashboardData();
-
-        } catch (error) {
-
-            console.error(
-                "Delete event error:",
-                error
-            );
-
-            alert(
-                friendlyError(error)
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       PUBLIC EVENTS
-    ===================================================== */
-
-    async function loadPublicEvents() {
-
-        const container =
-            $("publicEventsGrid") ||
-            $("eventsGrid") ||
-            $("publicEvents");
-
-
-        if (!container) {
-            return;
-        }
-
-
-        if (!supabaseClient) {
-
-            container.innerHTML =
-                `<div class="events-empty">
-                    EVENTS DATA UNAVAILABLE.
-                </div>`;
-
-            return;
-
-        }
-
-
-        container.innerHTML =
-            `<div class="events-loading">
-                LOADING EVENTS...
-            </div>`;
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("events")
-                    .select(`
-                        id,
-                        title,
-                        event_date,
-                        description,
-                        poster_url,
-                        registration_url,
-                        display_order,
-                        published
-                    `)
-                    .eq(
-                        "published",
-                        true
-                    )
-                    .order(
-                        "display_order",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "event_date",
-                        {
-                            ascending: true
-                        }
+                        editingGalleryId
                     );
 
 
@@ -2896,267 +3913,446 @@ try {
             }
 
 
-            /*
-             * IMPORTANT:
-             * NO EVENTS = UPDATED SOON
-             */
+        } else {
 
-            if (
-                !data ||
-                data.length === 0
+            const files =
+                Array.from(
+                    imageInput.files
+                );
+
+
+            for (
+                let index = 0;
+                index < files.length;
+                index++
             ) {
 
-                container.innerHTML =
-                    `<div class="events-empty">
-                        EVENTS WILL BE UPDATED SOON.
-                    </div>`;
+                const file =
+                    files[index];
 
-                return;
+
+                if (message) {
+
+                    message.textContent =
+                        `UPLOADING ${index + 1}/${files.length}...`;
+
+                }
+
+
+                const reader =
+                    new FileReader();
+
+
+                const imageURL =
+                    await new Promise(
+                        (
+                            resolve,
+                            reject
+                        ) => {
+
+                            reader.onload =
+                                () => resolve(
+                                    reader.result
+                                );
+
+                            reader.onerror =
+                                () => reject(
+                                    new Error(
+                                        `Unable to read ${file.name}.`
+                                    )
+                                );
+
+                            reader.readAsDataURL(
+                                file
+                            );
+
+                        }
+                    );
+
+
+                const {
+                    error
+                } =
+                    await supabaseClient
+                        .from("gallery")
+                        .insert({
+                            image_url:
+                                imageURL,
+                            caption:
+                                caption ||
+                                null,
+                            display_order:
+                                baseOrder +
+                                index,
+                            published
+                        });
+
+
+                if (error) {
+                    throw error;
+                }
 
             }
 
-
-            container.innerHTML = "";
-
-
-            data.forEach(
-                eventData => {
-
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
-
-                    card.className =
-                        "public-event-card";
+        }
 
 
-                    const date =
-                        formatEventDate(
-                            eventData.event_date
-                        );
+        if (message) {
+
+            message.textContent =
+                "GALLERY SAVED SUCCESSFULLY.";
+
+        }
 
 
-                    const poster =
-                        eventData.poster_url
-                            ? `
-                                <div class="event-poster">
-                                    <img
-                                        src="${escapeAttribute(
-                                            eventData.poster_url
-                                        )}"
-                                        alt="${escapeAttribute(
-                                            eventData.title ||
-                                            "SYNTHENOVA Event"
-                                        )}"
-                                        loading="lazy"
-                                    >
-                                </div>
-                            `
-                            : "";
+        closeGalleryAdminModal();
+
+        await loadAdminGallery();
+
+        await loadPublicGallery();
+
+        await updateAdminCounts();
 
 
-                    /*
-                     * GOOGLE FORM REGISTER BUTTON
-                     *
-                     * If registration_url exists:
-                     * SHOW REGISTER NOW
-                     *
-                     * If not:
-                     * DON'T SHOW BUTTON
-                     */
+    } catch (error) {
 
-                    const registerButton =
-                        eventData.registration_url
-                            ? `
-                                <a
-                                    class="event-register-button"
-                                    href="${escapeAttribute(
-                                        eventData.registration_url
-                                    )}"
-                                    rel="noopener noreferrer"
-                                >
-                                    REGISTER NOW
-                                    <span>↗</span>
-                                </a>
-                            `
-                            : "";
+        console.error(
+            "Save gallery error:",
+            error
+        );
 
+        if (message) {
 
-                    card.innerHTML = `
+            message.textContent =
+                error.message ||
+                "UNABLE TO SAVE GALLERY.";
 
-                        ${poster}
+        }
 
-                        <div class="event-content">
+    } finally {
 
-                            ${
-                                date
-                                    ? `
-                                        <span class="event-date">
-                                            ${escapeHTML(
-                                                date
-                                            )}
-                                        </span>
-                                    `
-                                    : ""
-                            }
+        if (saveButton) {
 
-                            <h3>
-                                ${escapeHTML(
-                                    eventData.title ||
-                                    "SYNTHENOVA EVENT"
-                                )}
-                            </h3>
+            saveButton.disabled = false;
 
-                            ${
-                                eventData.description
-                                    ? `
-                                        <p>
-                                            ${escapeHTML(
-                                                eventData.description
-                                            )}
-                                        </p>
-                                    `
-                                    : ""
-                            }
-
-                            ${registerButton}
-
-                        </div>
-                    `;
-
-
-                    container.appendChild(
-                        card
-                    );
-
-                }
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Public events error:",
-                error
-            );
-
-            container.innerHTML =
-                `<div class="events-empty">
-                    EVENTS WILL BE UPDATED SOON.
-                </div>`;
+            saveButton.textContent =
+                "SAVE GALLERY";
 
         }
 
     }
 
-
-    /* =====================================================
-       GALLERY ADMIN
-       MULTIPLE IMAGE UPLOAD
-    ===================================================== */
-
-    function openGalleryAdminModal(
-        galleryData = null
-    ) {
-
-        editingGalleryId =
-            galleryData?.id ||
-            null;
+}
 
 
-        if ($("galleryModalTitle")) {
+/* =========================================================
+   LOAD ADMIN GALLERY
+========================================================= */
 
-            $("galleryModalTitle").textContent =
-                galleryData
-                    ? "EDIT GALLERY ITEM"
-                    : "ADD GALLERY ITEMS";
+async function loadAdminGallery() {
 
-        }
+    const container =
+        $("adminGalleryList");
 
-
-        if ($("adminGalleryImage")) {
-
-            $("adminGalleryImage").value =
-                "";
-
-        }
-
-
-        setValue(
-            "adminGalleryCaption",
-            galleryData?.caption ||
-            ""
-        );
-
-
-        setValue(
-            "adminGalleryOrder",
-            galleryData?.display_order ??
-            0
-        );
-
-
-        if ($("adminGalleryPublished")) {
-
-            $("adminGalleryPublished").checked =
-                galleryData?.published !== false;
-
-        }
-
-
-        showMessage(
-            "galleryAdminMessage",
-            ""
-        );
-
-
-        $("galleryAdminModal")
-            ?.classList.add(
-                "active"
-            );
-
-        body.classList.add(
-            "modal-open"
-        );
-
+    if (!container) {
+        return;
     }
 
 
-    function closeGalleryAdminModal() {
+    if (!supabaseClient) {
 
-        $("galleryAdminModal")
-            ?.classList.remove(
-                "active"
-            );
-
-        body.classList.remove(
-            "modal-open"
-        );
-
-        editingGalleryId = null;
-
-    }
-
-
-    async function loadAdminGallery() {
-
-        const list =
-            $("adminGalleryList");
-
-        if (
-            !list ||
-            !supabaseClient ||
-            !isAdmin
-        ) {
-            return;
-        }
-
-
-        list.innerHTML =
-            `<div class="admin-loading">
-                LOADING GALLERY...
+        container.innerHTML =
+            `<div class="admin-empty">
+                SUPABASE UNAVAILABLE.
             </div>`;
 
+        return;
+
+    }
+
+
+    container.innerHTML =
+        `<div class="admin-loading">
+            LOADING GALLERY...
+        </div>`;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("gallery")
+                .select("*")
+                .order(
+                    "display_order",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        if (
+            !data ||
+            data.length === 0
+        ) {
+
+            container.innerHTML =
+                `<div class="admin-empty">
+                    NO GALLERY IMAGES YET.
+                </div>`;
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+        container.classList.add(
+            "admin-gallery-list"
+        );
+
+
+        data.forEach(
+            galleryData => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+                item.className =
+                    "admin-gallery-item";
+
+
+                const imageHTML =
+                    galleryData.image_url
+                        ? `<img
+                            src="${escapeHTML(galleryData.image_url)}"
+                            alt="${escapeHTML(galleryData.caption || "SYNTHENOVA gallery image")}"
+                            loading="lazy"
+                          >`
+                        : `<div class="admin-item-placeholder">
+                            IMAGE
+                          </div>`;
+
+
+                item.innerHTML = `
+                    <div class="admin-gallery-preview">
+                        ${imageHTML}
+                    </div>
+
+                    <div class="admin-gallery-info">
+
+                        <strong>
+                            ${escapeHTML(
+                                galleryData.caption ||
+                                "SYNTHENOVA IMAGE"
+                            )}
+                        </strong>
+
+                        <small>
+                            ORDER:
+                            ${galleryData.display_order ?? 0}
+                        </small>
+
+                        <small>
+                            ${
+                                galleryData.published
+                                    ? "PUBLISHED"
+                                    : "HIDDEN"
+                            }
+                        </small>
+
+                    </div>
+
+                    <div class="admin-data-item-actions">
+
+                        <button
+                            type="button"
+                            class="admin-secondary-button edit-gallery-button"
+                        >
+                            EDIT
+                        </button>
+
+                        <button
+                            type="button"
+                            class="admin-danger-button delete-gallery-button"
+                        >
+                            DELETE
+                        </button>
+
+                    </div>
+                `;
+
+
+                item.querySelector(
+                    ".edit-gallery-button"
+                )?.addEventListener(
+                    "click",
+                    () => {
+
+                        openGalleryAdminModal(
+                            galleryData
+                        );
+
+                    }
+                );
+
+
+                item.querySelector(
+                    ".delete-gallery-button"
+                )?.addEventListener(
+                    "click",
+                    async () => {
+
+                        await deleteGalleryImage(
+                            galleryData
+                        );
+
+                    }
+                );
+
+
+                container.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Load admin gallery error:",
+            error
+        );
+
+        container.innerHTML =
+            `<div class="admin-empty">
+                UNABLE TO LOAD GALLERY.
+            </div>`;
+
+    }
+
+}
+
+
+/* =========================================================
+   DELETE GALLERY IMAGE
+========================================================= */
+
+async function deleteGalleryImage(
+    galleryData
+) {
+
+    if (
+        !supabaseClient ||
+        !isAdmin ||
+        !galleryData?.id
+    ) {
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Delete this gallery image?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("gallery")
+                .delete()
+                .eq(
+                    "id",
+                    galleryData.id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await loadAdminGallery();
+
+        await loadPublicGallery();
+
+        await updateAdminCounts();
+
+
+    } catch (error) {
+
+        console.error(
+            "Delete gallery error:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "UNABLE TO DELETE GALLERY IMAGE."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PUBLIC GALLERY
+========================================================= */
+
+async function loadPublicGallery() {
+
+    const galleryContainer =
+        $("publicGalleryGrid") ||
+        $("galleryGrid") ||
+        $("galleryContainer");
+
+    if (!galleryContainer) {
+        return;
+    }
+
+
+    if (!supabaseClient) {
+
+        galleryContainer.innerHTML =
+            `<div class="gallery-loading">
+                GALLERY DATA UNAVAILABLE.
+            </div>`;
+
+        return;
+
+    }
+
+
+    galleryContainer.innerHTML =
+        `<div class="gallery-loading">
+            LOADING GALLERY...
+        </div>`;
+
+
+    try {
 
         const {
             data,
@@ -3169,37 +4365,22 @@ try {
                     image_url,
                     caption,
                     display_order,
-                    published,
-                    created_at
+                    published
                 `)
+                .eq(
+                    "published",
+                    true
+                )
                 .order(
                     "display_order",
                     {
                         ascending: true
                     }
-                )
-                .order(
-                    "created_at",
-                    {
-                        ascending: false
-                    }
                 );
 
 
         if (error) {
-
-            console.error(
-                "Gallery loading error:",
-                error
-            );
-
-            list.innerHTML =
-                `<div class="admin-empty">
-                    FAILED TO LOAD GALLERY.
-                </div>`;
-
-            return;
-
+            throw error;
         }
 
 
@@ -3208,9 +4389,9 @@ try {
             data.length === 0
         ) {
 
-            list.innerHTML =
-                `<div class="admin-empty">
-                    NO GALLERY ITEMS YET.
+            galleryContainer.innerHTML =
+                `<div class="gallery-loading">
+                    GALLERY WILL BE UPDATED SOON.
                 </div>`;
 
             return;
@@ -3218,1192 +4399,115 @@ try {
         }
 
 
-        list.innerHTML =
-            data
-                .map(
-                    item =>
-                        createAdminGalleryCard(
-                            item
-                        )
-                )
-                .join("");
+        galleryContainer.innerHTML = "";
 
 
-        list
-            .querySelectorAll(
-                "[data-edit-gallery]"
-            )
-            .forEach(button => {
+        data.forEach(
+            galleryData => {
 
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const item =
-                            data.find(
-                                galleryItem =>
-                                    galleryItem.id ===
-                                    button.dataset.editGallery
-                            );
-
-                        if (item) {
-
-                            openGalleryAdminModal(
-                                item
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
-
-
-        list
-            .querySelectorAll(
-                "[data-delete-gallery]"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const item =
-                            data.find(
-                                galleryItem =>
-                                    galleryItem.id ===
-                                    button.dataset.deleteGallery
-                            );
-
-                        if (item) {
-
-                            deleteGalleryItem(
-                                item
-                            );
-
-                        }
-
-                    }
-                );
-
-            });
-
-    }
-
-
-    function createAdminGalleryCard(
-        item
-    ) {
-
-        return `
-            <article class="admin-data-card">
-
-                <div class="admin-data-image">
-
-                    <img
-                        src="${escapeAttribute(
-                            item.image_url
-                        )}"
-                        alt="${escapeAttribute(
-                            item.caption ||
-                            "SYNTHENOVA Gallery"
-                        )}"
-                    >
-
-                </div>
-
-                <div class="admin-data-content">
-
-                    <h3>
-                        ${escapeHTML(
-                            item.caption ||
-                            "GALLERY IMAGE"
-                        )}
-                    </h3>
-
-                    <p>
-                        ${
-                            item.published
-                                ? "PUBLISHED"
-                                : "HIDDEN"
-                        }
-                    </p>
-
-                    <small>
-                        ORDER ${
-                            Number(
-                                item.display_order
-                            ) || 0
-                        }
-                    </small>
-
-                    <div class="admin-card-actions">
-
-                        <button
-                            type="button"
-                            class="admin-secondary-button"
-                            data-edit-gallery="${escapeAttribute(
-                                item.id
-                            )}"
-                        >
-                            EDIT
-                        </button>
-
-                        <button
-                            type="button"
-                            class="admin-danger-button"
-                            data-delete-gallery="${escapeAttribute(
-                                item.id
-                            )}"
-                        >
-                            DELETE
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </article>
-        `;
-
-    }
-
-
-    /* =====================================================
-       MULTIPLE GALLERY UPLOAD
-    ===================================================== */
-
-    async function saveGallery(
-        event
-    ) {
-
-        event.preventDefault();
-
-        if (
-            !supabaseClient ||
-            !isAdmin
-        ) {
-            return;
-        }
-
-
-        const button =
-            $("saveGalleryButton");
-
-
-        if (button) {
-
-            button.disabled = true;
-
-            button.textContent =
-                "UPLOADING...";
-
-        }
-
-
-        try {
-
-            const imageInput =
-                $("adminGalleryImage");
-
-
-            const files =
-                imageInput?.files
-                    ? Array.from(
-                        imageInput.files
-                    )
-                    : [];
-
-
-            /*
-             * EDIT MODE
-             */
-
-            if (editingGalleryId) {
-
-                await updateGalleryItem(
-                    files[0] || null
-                );
-
-                closeGalleryAdminModal();
-
-                await loadAdminGallery();
-
-                await loadPublicGallery();
-
-                await loadDashboardData();
-
-                alert(
-                    "GALLERY ITEM UPDATED."
-                );
-
-                return;
-
-            }
-
-
-            /*
-             * ADD MODE
-             *
-             * MULTIPLE FILES
-             */
-
-            if (!files.length) {
-
-                throw new Error(
-                    "Please select at least one image."
-                );
-
-            }
-
-
-            const caption =
-                getValue(
-                    "adminGalleryCaption"
-                );
-
-
-            const startOrder =
-                Math.max(
-                    0,
-                    Number(
-                        getValue(
-                            "adminGalleryOrder"
-                        )
-                    ) || 0
-                );
-
-
-            const published =
-                $("adminGalleryPublished")
-                    ?.checked !== false;
-
-
-            const total =
-                files.length;
-
-
-            let uploaded =
-                0;
-
-
-            for (
-                let index = 0;
-                index < total;
-                index++
-            ) {
-
-                const file =
-                    files[index];
-
-
-                validateImage(
-                    file,
-                    10
-                );
-
-
-                if (button) {
-
-                    button.textContent =
-                        `UPLOADING ${index + 1}/${total}...`;
-
-                }
-
-
-                const imageUrl =
-                    await fileToDataURL(
-                        file
+                const item =
+                    document.createElement(
+                        "figure"
                     );
 
+                item.className =
+                    "gallery-item";
 
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from("gallery")
-                        .insert({
-                            image_url:
-                                imageUrl,
 
-                            caption:
-                                caption ||
-                                file.name,
+                if (
+                    galleryData.image_url
+                ) {
 
-                            display_order:
-                                startOrder +
-                                index,
-
-                            published
-                        });
-
-
-                if (error) {
-                    throw error;
-                }
-
-
-                uploaded++;
-
-            }
-
-
-            closeGalleryAdminModal();
-
-            await loadAdminGallery();
-
-            await loadPublicGallery();
-
-            await loadDashboardData();
-
-
-            alert(
-                `${uploaded} IMAGE${
-                    uploaded === 1
-                        ? ""
-                        : "S"
-                } UPLOADED SUCCESSFULLY.`
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Gallery upload error:",
-                error
-            );
-
-            showMessage(
-                "galleryAdminMessage",
-                friendlyError(error),
-                true
-            );
-
-        } finally {
-
-            if (button) {
-
-                button.disabled = false;
-
-                button.textContent =
-                    "UPLOAD IMAGE";
-
-            }
-
-        }
-
-    }
-
-
-    async function updateGalleryItem(
-        file
-    ) {
-
-        const caption =
-            getValue(
-                "adminGalleryCaption"
-            );
-
-        const order =
-            Math.max(
-                0,
-                Number(
-                    getValue(
-                        "adminGalleryOrder"
-                    )
-                ) || 0
-            );
-
-        const published =
-            $("adminGalleryPublished")
-                ?.checked !== false;
-
-
-        let imageUrl = null;
-
-
-        if (file) {
-
-            validateImage(
-                file,
-                10
-            );
-
-            imageUrl =
-                await fileToDataURL(
-                    file
-                );
-
-        }
-
-
-        const payload = {
-
-            caption:
-                caption ||
-                null,
-
-            display_order:
-                order,
-
-            published
-
-        };
-
-
-        if (imageUrl) {
-
-            payload.image_url =
-                imageUrl;
-
-        }
-
-
-        const {
-            error
-        } =
-            await supabaseClient
-                .from("gallery")
-                .update(
-                    payload
-                )
-                .eq(
-                    "id",
-                    editingGalleryId
-                );
-
-
-        if (error) {
-            throw error;
-        }
-
-    }
-
-
-    async function deleteGalleryItem(
-        item
-    ) {
-
-        const confirmed =
-            window.confirm(
-                "Delete this gallery image?"
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        try {
-
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("gallery")
-                    .delete()
-                    .eq(
-                        "id",
-                        item.id
-                    );
-
-
-            if (error) {
-                throw error;
-            }
-
-
-            await loadAdminGallery();
-
-            await loadPublicGallery();
-
-            await loadDashboardData();
-
-        } catch (error) {
-
-            console.error(
-                "Gallery delete error:",
-                error
-            );
-
-            alert(
-                friendlyError(error)
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       PUBLIC GALLERY
-    ===================================================== */
-
-    async function loadPublicGallery() {
-
-        const container =
-            $("publicGalleryGrid") ||
-            $("galleryGrid") ||
-            $("publicGallery");
-
-
-        if (!container) {
-            return;
-        }
-
-
-        if (!supabaseClient) {
-
-            container.innerHTML =
-                `<div class="gallery-empty">
-                    GALLERY DATA UNAVAILABLE.
-                </div>`;
-
-            return;
-
-        }
-
-
-        container.innerHTML =
-            `<div class="gallery-loading">
-                LOADING GALLERY...
-            </div>`;
-
-
-        try {
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("gallery")
-                    .select(`
-                        id,
-                        image_url,
-                        caption,
-                        display_order,
-                        published
-                    `)
-                    .eq(
-                        "published",
-                        true
-                    )
-                    .order(
-                        "display_order",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-                throw error;
-            }
-
-
-            if (
-                !data ||
-                data.length === 0
-            ) {
-
-                container.innerHTML =
-                    `<div class="gallery-empty">
-                        GALLERY COMING SOON.
-                    </div>`;
-
-                return;
-
-            }
-
-
-            container.innerHTML = "";
-
-
-            data.forEach(
-                item => {
-
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
-
-                    card.className =
-                        "gallery-item";
-
-
-                    card.innerHTML = `
-
+                    item.innerHTML = `
                         <img
-                            src="${escapeAttribute(
-                                item.image_url
-                            )}"
-                            alt="${escapeAttribute(
-                                item.caption ||
-                                "SYNTHENOVA Gallery"
-                            )}"
+                            src="${escapeHTML(galleryData.image_url)}"
+                            alt="${escapeHTML(galleryData.caption || "SYNTHENOVA gallery image")}"
                             loading="lazy"
                         >
 
                         ${
-                            item.caption
-                                ? `
-                                    <div class="gallery-caption">
-                                        ${escapeHTML(
-                                            item.caption
-                                        )}
-                                    </div>
-                                `
+                            galleryData.caption
+                                ? `<figcaption>
+                                    ${escapeHTML(
+                                        galleryData.caption
+                                    )}
+                                  </figcaption>`
                                 : ""
                         }
-
                     `;
 
-
-                    card.addEventListener(
-                        "click",
-                        () =>
-                            openGalleryPreview(
-                                item
-                            )
-                    );
-
-
-                    container.appendChild(
-                        card
-                    );
-
                 }
-            );
 
-        } catch (error) {
 
-            console.error(
-                "Public gallery error:",
-                error
-            );
-
-            container.innerHTML =
-                `<div class="gallery-empty">
-                    GALLERY COMING SOON.
-                </div>`;
-
-        }
-
-    }
-
-
-    /* =====================================================
-       GALLERY PREVIEW
-    ===================================================== */
-
-    function openGalleryPreview(
-        item
-    ) {
-
-        let modal =
-            $("galleryPreviewModal");
-
-
-        if (!modal) {
-
-            modal =
-                document.createElement(
-                    "div"
-                );
-
-            modal.id =
-                "galleryPreviewModal";
-
-            modal.className =
-                "gallery-preview-modal";
-
-
-            modal.innerHTML = `
-
-                <button
-                    type="button"
-                    class="gallery-preview-close"
-                    aria-label="Close gallery"
-                >
-                    ×
-                </button>
-
-                <div class="gallery-preview-inner">
-
-                    <img
-                        id="galleryPreviewImage"
-                        src=""
-                        alt=""
-                    >
-
-                    <div
-                        id="galleryPreviewCaption"
-                        class="gallery-preview-caption"
-                    ></div>
-
-                </div>
-
-            `;
-
-
-            body.appendChild(
-                modal
-            );
-
-
-            modal
-                .querySelector(
-                    ".gallery-preview-close"
-                )
-                ?.addEventListener(
-                    "click",
-                    closeGalleryPreview
-                );
-
-
-            modal.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        modal
-                    ) {
-
-                        closeGalleryPreview();
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        const image =
-            $("galleryPreviewImage");
-
-        const caption =
-            $("galleryPreviewCaption");
-
-
-        if (image) {
-
-            image.src =
-                item.image_url ||
-                "";
-
-            image.alt =
-                item.caption ||
-                "SYNTHENOVA Gallery";
-
-        }
-
-
-        if (caption) {
-
-            caption.textContent =
-                item.caption ||
-                "";
-
-        }
-
-
-        modal.classList.add(
-            "active"
-        );
-
-        body.classList.add(
-            "modal-open"
-        );
-
-    }
-
-
-    function closeGalleryPreview() {
-
-        $("galleryPreviewModal")
-            ?.classList.remove(
-                "active"
-            );
-
-        body.classList.remove(
-            "modal-open"
-        );
-
-    }
-
-
-    /* =====================================================
-       HELPERS
-    ===================================================== */
-
-    function getValue(
-        id
-    ) {
-
-        return (
-            $(id)?.value ||
-            ""
-        ).trim();
-
-    }
-
-
-    function setValue(
-        id,
-        value
-    ) {
-
-        if ($(id)) {
-
-            $(id).value =
-                value ?? "";
-
-        }
-
-    }
-
-
-    function showMessage(
-        id,
-        message,
-        isError = false
-    ) {
-
-        const element =
-            $(id);
-
-        if (!element) {
-            return;
-        }
-
-        element.textContent =
-            message || "";
-
-        element.classList.toggle(
-            "error",
-            isError
-        );
-
-        element.classList.toggle(
-            "success",
-            !isError &&
-            !!message
-        );
-
-    }
-
-
-    function validateImage(
-        file,
-        maxMB
-    ) {
-
-        if (!file) {
-
-            throw new Error(
-                "No image selected."
-            );
-
-        }
-
-
-        if (
-            !file.type.startsWith(
-                "image/"
-            )
-        ) {
-
-            throw new Error(
-                "Please select an image file."
-            );
-
-        }
-
-
-        if (
-            file.size >
-            maxMB * 1024 * 1024
-        ) {
-
-            throw new Error(
-                `Image must be smaller than ${maxMB} MB.`
-            );
-
-        }
-
-    }
-
-
-    function fileToDataURL(
-        file
-    ) {
-
-        return new Promise(
-            (
-                resolve,
-                reject
-            ) => {
-
-                const reader =
-                    new FileReader();
-
-
-                reader.onload =
-                    () => {
-
-                        resolve(
-                            reader.result
-                        );
-
-                    };
-
-
-                reader.onerror =
-                    () => {
-
-                        reject(
-                            new Error(
-                                "FAILED TO READ IMAGE."
-                            )
-                        );
-
-                    };
-
-
-                reader.readAsDataURL(
-                    file
+                galleryContainer.appendChild(
+                    item
                 );
 
             }
         );
 
-    }
 
+    } catch (error) {
 
-    function formatEventDate(
-        dateString
-    ) {
+        console.error(
+            "Public gallery error:",
+            error
+        );
 
-        if (!dateString) {
-            return "";
-        }
-
-        try {
-
-            const date =
-                new Date(
-                    dateString
-                );
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return dateString;
-
-            }
-
-            return new Intl.DateTimeFormat(
-                "en-IN",
-                {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric"
-                }
-            ).format(
-                date
-            );
-
-        } catch {
-
-            return dateString;
-
-        }
+        galleryContainer.innerHTML =
+            `<div class="gallery-loading">
+                UNABLE TO LOAD GALLERY.
+            </div>`;
 
     }
 
-
-    function getFileExtension(
-        fileName
-    ) {
-
-        const extension =
-            fileName
-                .split(".")
-                .pop()
-                ?.toLowerCase();
+}
 
 
-        if (
-            [
-                "jpg",
-                "jpeg",
-                "png",
-                "webp"
-            ].includes(
-                extension
-            )
-        ) {
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
-            return extension;
+try {
 
-        }
+    await initializeSupabase();
 
-        return "jpg";
+    setupNavigation();
+
+    setupPublicInteractions();
+
+    setupAuthentication();
+
+    setupAdminDashboard();
+
+    await initializeAuth();
+
+
+    if (supabaseClient) {
+
+        await loadPublicTeam();
+
+        await loadPublicEvents();
+
+        await loadPublicGallery();
 
     }
 
 
-    function escapeHTML(
-        value
-    ) {
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-        div.textContent =
-            value ?? "";
-
-        return div.innerHTML;
-
-    }
+    updateAuthUI();
 
 
-    function escapeAttribute(
-        value
-    ) {
+} catch (error) {
 
-        return escapeHTML(
-            value
-        )
-            .replaceAll(
-                '"',
-                "&quot;"
-            )
-            .replaceAll(
-                "'",
-                "&#039;"
-            );
-
-    }
-
-
-    function friendlyError(
+    console.error(
+        "SYNTHENOVA initialization error:",
         error
-    ) {
-
-        if (!error) {
-
-            return "Something went wrong.";
-
-        }
-
-
-        const message =
-            error.message ||
-            String(error);
-
-
-        const lower =
-            message.toLowerCase();
-
-
-        if (
-            lower.includes(
-                "invalid login credentials"
-            )
-        ) {
-
-            return (
-                "Incorrect email or password."
-            );
-
-        }
-
-
-        if (
-            lower.includes(
-                "row-level security"
-            ) ||
-            lower.includes(
-                "permission denied"
-            )
-        ) {
-
-            return (
-                "Supabase permission denied. Check your RLS policies."
-            );
-
-        }
-
-
-        if (
-            lower.includes(
-                "storage"
-            ) ||
-            lower.includes(
-                "bucket"
-            )
-        ) {
-
-            return (
-                'Storage error. Check the "team photo" bucket policies.'
-            );
-
-        }
-
-
-        return message;
-
-    }
-
-
-    /* =====================================================
-       PUBLIC DEBUG API
-    ===================================================== */
-
-    window.SYNTHENOVA = {
-
-        getUser:
-            () =>
-                currentUser,
-
-        isAdmin:
-            () =>
-                isAdmin,
-
-        openAdmin:
-            openAdminDashboard,
-
-        closeAdmin:
-            closeAdminDashboard,
-
-        logout:
-            logoutAdmin,
-
-        reloadTeam:
-            loadPublicTeam,
-
-        reloadEvents:
-            loadPublicEvents,
-
-        reloadGallery:
-            loadPublicGallery
-
-    };
-
-
-    console.log(
-        "SYNTHENOVA frontend initialized."
     );
+
+} finally {
+
+    hidePageLoader();
+
+}
 
 });
