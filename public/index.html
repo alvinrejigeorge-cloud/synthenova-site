@@ -1,2018 +1,1370 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>SYNTHENOVA</title>
-
-    <!-- SYNTHENOVA BROWSER LOGO -->
-    <link
-        rel="icon"
-        type="image/png"
-        href="./images/logo.png"
-    >
-
-    <link
-        rel="apple-touch-icon"
-        href="./images/logo.png"
-    >
-
-    <link
-        rel="stylesheet"
-        href="./css/styles.css"
-    >
-
+<meta charset="UTF-8">
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
+<title>SYNTHENOVA</title>
+<!-- SYNTHENOVA BROWSER LOGO -->
+<link
+rel="icon"
+type="image/png"
+href="./images/logo.png"
+>
+<link
+rel="apple-touch-icon"
+href="./images/logo.png"
+>
+<link
+rel="stylesheet"
+href="./css/styles.css"
+>
 </head>
 <body>
-
-    <!-- =====================================================
-         LOADER
-    ====================================================== -->
-
-    <div id="pageLoader" class="page-loader">
-
-        <div class="loader-inner">
-
-            <div class="loader-ring"></div>
-
-            <span>SYNTHENOVA</span>
-
-            <small>INITIALIZING</small>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         BACKGROUND
-    ====================================================== -->
-
-    <div class="grain"></div>
-
-    <div class="bg-orb bg-orb-one"></div>
-    <div class="bg-orb bg-orb-two"></div>
-
-
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
-
-    <header class="topbar">
-
-        <a
-            href="#home"
-            class="brand"
-        >
-
-            <div class="brand-logo">
-
-                <img
-                    src="./images/logo.png"
-                    alt="SYNTHENOVA Logo"
-                >
-
-            </div>
-
-            <div class="brand-info">
-
-                <strong>SYNTHENOVA</strong>
-
-
-            </div>
-
-        </a>
-
-
-        <nav class="desktop-nav">
-
-            <a
-                href="#home"
-                class="nav-link active"
-            >
-                HOME
-            </a>
-
-            <a
-                href="#about"
-                class="nav-link"
-            >
-                ABOUT
-            </a>
-
-            <a
-                href="#events"
-                class="nav-link"
-            >
-                EVENTS
-            </a>
-
-            <a
-                href="#team"
-                class="nav-link"
-            >
-                TEAM
-            </a>
-
-            <a
-                href="#gallery"
-                class="nav-link"
-            >
-                GALLERY
-            </a>
-
-            <a
-                href="#contact"
-                class="nav-link"
-            >
-                CONTACT
-            </a>
-
-        </nav>
-
-
-        <div class="nav-actions">
-
-            <button
-                id="loginButton"
-                class="nav-pill"
-                type="button"
-            >
-                LOGIN
-            </button>
-
-            <button
-                id="adminButton"
-                class="nav-pill hidden"
-                type="button"
-            >
-                ADMIN
-            </button>
-
-            <button
-                id="logoutButton"
-                class="nav-pill hidden"
-                type="button"
-            >
-                LOGOUT
-            </button>
-
-        </div>
-
-
-        <button
-            id="menuButton"
-            class="menu-button"
-            type="button"
-            aria-label="Open navigation menu"
-        >
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-        </button>
-
-    </header>
-
-
-    <!-- =====================================================
-         SIDE MENU
-    ====================================================== -->
-
-    <div
-        id="menuOverlay"
-        class="menu-overlay"
-    ></div>
-
-
-    <aside
-        id="sideMenu"
-        class="side-menu"
-    >
-
-        <button
-            id="closeMenu"
-            class="side-menu-close"
-            type="button"
-            aria-label="Close menu"
-        >
-            ×
-        </button>
-
-
-        <div class="side-menu-brand">
-
-            <div class="side-logo">
-
-                <img
-                    src="./images/logo.png"
-                    alt="SYNTHENOVA"
-                >
-
-            </div>
-
-            <div>
-
-                <strong>SYNTHENOVA</strong>
-
-                <small>
-                    DIGITAL COMMUNITY
-                </small>
-
-            </div>
-
-        </div>
-
-
-        <div class="side-menu-label">
-            NAVIGATION
-        </div>
-
-
-        <nav class="mobile-nav">
-
-            <a href="#home">
-                <span>01</span>
-                HOME
-            </a>
-
-            <a href="#about">
-                <span>02</span>
-                ABOUT
-            </a>
-
-            <a href="#events">
-                <span>03</span>
-                EVENTS
-            </a>
-
-            <a href="#team">
-                <span>04</span>
-                TEAM
-            </a>
-
-            <a href="#gallery">
-                <span>05</span>
-                GALLERY
-            </a>
-
-            <a href="#contact">
-                <span>06</span>
-                CONTACT
-            </a>
-
-        </nav>
-
-
-        <div class="side-auth">
-
-            <button
-                id="mobileLogin"
-                type="button"
-            >
-                 LOGIN
-            </button>
-
-            <button
-                id="mobileAdmin"
-                class="hidden"
-                type="button"
-            >
-                ADMIN DASHBOARD
-            </button>
-
-            <button
-                id="mobileLogout"
-                class="hidden"
-                type="button"
-            >
-                LOGOUT
-            </button>
-
-        </div>
-
-
-        <div class="side-menu-footer">
-
-            <span>
-                SYNTHENOVA
-            </span>
-
-            <small>
-                TECHNOLOGY • INNOVATION • CREATIVITY
-            </small>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <main>
-
-
-        <!-- =================================================
-             HOME
-        ================================================== -->
-
-        <section
-            id="home"
-            class="home-section"
-        >
-
-            <div class="home-label">
-
-                <span class="status-dot"></span>
-
-                SYNTHENOVA 
-
-
-            </div>
-
-
-            <div class="hero-grid">
-
-
-                <!-- HERO TEXT -->
-
-                <div class="hero-content">
-
-                    <div class="hero-pill">
-
-                    </div>
-
-
-                    <h1 class="hero-title">
-
-                        <span>BUILD</span>
-
-                        <span class="hero-outline">
-                            BEYOND
-                        </span>
-
-                        <span>LIMITS.</span>
-
-                    </h1>
-
-
-                    <p class="hero-description">
-
-                        A student-driven technology community
-                        where ideas, creativity and innovation
-                        come together to build something new.
-
-                    </p>
-
-
-                    <div class="hero-buttons">
-
-                        <button
-                            id="joinButton"
-                            class="primary-button"
-                            type="button"
-                        >
-                            JOIN COMMUNITY
-
-                            <span>→</span>
-
-                        </button>
-
-
-                        <a
-                            href="#about"
-                            class="secondary-button"
-                        >
-                            EXPLORE
-
-                            <span>↓</span>
-
-                        </a>
-
-                    </div>
-
-
-                    <div class="hero-stats">
-
-                        <div>
-
-                            <strong>01</strong>
-
-                            <span>
-                                INNOVATION
-                            </span>
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>02</strong>
-
-                            <span>
-                                CREATIVITY
-                            </span>
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>03</strong>
-
-                            <span>
-                                COMMUNITY
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- HERO VISUAL -->
-
-                <div class="hero-visual">
-
-
-                    <div class="visual-label">
-
-                        <span>SYNTHENOVA</span>
-
-                        <small>EST. 1999</small>
-
-                    </div>
-
-
-                    </div>
-
-
-                    <div class="floating-symbol">
-                        ϟ
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="scroll-indicator">
-
-                <span>SCROLL</span>
-
-                <strong>↓</strong>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             ABOUT
-        ================================================== -->
-
-        <section
-            id="about"
-            class="content-section about-section"
-        >
-
-            <div class="section-heading">
-
-                <div class="section-number">
-                    01
-                </div>
-
-                <div>
-
-                    <span class="section-label">
-                        WHO WE ARE
-                    </span>
-
-                    <h2>
-                    ABOUT
-                    <span>SYNTHENOVA</span>
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div class="about-introduction">
-
-                <div class="about-statement">
-
-                    <span>
-                        OUR IDEA
-                    </span>
-
-                    <h3>
-
-                        Technology is not
-                        just something we use.
-
-                        <em>
-                            It's something we create.
-                        </em>
-
-                    </h3>
-
-                </div>
-
-
-                <div class="about-text">
-
-                    <p>
-
-                        SYNTHENOVA is a student-driven
-                        technology and creativity community
-                        focused on learning, experimentation
-                        and innovation.
-
-                    </p>
-
-                    <p>
-
-                        We bring together curious minds
-                        interested in technology, electronics,
-                        artificial intelligence, design and
-                        digital creativity.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="about-cards">
-
-
-                <article class="info-card">
-
-                    <span class="card-number">
-                        01
-                    </span>
-
-                    <div class="card-icon">
-                        ✦
-                    </div>
-
-                    <h3>
-                        INNOVATION
-                    </h3>
-
-                    <p>
-                        Exploring ideas and turning
-                        concepts into real experiences.
-                    </p>
-
-                    <span class="card-arrow">
-                        ↗
-                    </span>
-
-                </article>
-
-
-                <article class="info-card featured">
-
-                    <span class="card-number">
-                        02
-                    </span>
-
-                    <div class="card-icon">
-                        ◈
-                    </div>
-
-                    <h3>
-                        TECHNOLOGY
-                    </h3>
-
-                    <p>
-                        Learning and experimenting with
-                        emerging technologies.
-                    </p>
-
-                    <span class="card-arrow">
-                        ↗
-                    </span>
-
-                </article>
-
-
-                <article class="info-card">
-
-                    <span class="card-number">
-                        03
-                    </span>
-
-                    <div class="card-icon">
-                        ⌁
-                    </div>
-
-                    <h3>
-                        CREATIVITY
-                    </h3>
-
-                    <p>
-                        Combining design, imagination and
-                        technology to create something new.
-                    </p>
-
-                    <span class="card-arrow">
-                        ↗
-                    </span>
-
-                </article>
-
-
-                <article class="info-card">
-
-                    <span class="card-number">
-                        04
-                    </span>
-
-                    <div class="card-icon">
-                        ϟ
-                    </div>
-
-                    <h3>
-                        COMMUNITY
-                    </h3>
-
-                    <p>
-                        A place where curious minds connect,
-                        collaborate and grow together.
-                    </p>
-
-                    <span class="card-arrow">
-                        ↗
-                    </span>
-
-                </article>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             EVENTS
-        ================================================== -->
-
-        <section
-            id="events"
-            class="content-section events-section"
-        >
-
-            <div class="section-heading">
-
-                <div class="section-number">
-                    02
-                </div>
-
-                <div>
-
-                    <span class="section-label">
-                        WHAT'S HAPPENING
-                    </span>
-
-                    <h2>
-                        EVENTS
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="publicEventsGrid"
-                class="events-layout"
-            >
-                <div class="events-loading">
-                    LOADING EVENTS...
-                </div>
-            </div>
-
-        </section>
-
-
 <!-- =====================================================
-     TEAM
+LOADER
 ====================================================== -->
-
-<section id="team" class="team-section">
-
-    <div class="section-header">
-        <span class="section-kicker">SYNTHENOVA / OUR PEOPLE</span>
-
-        <h2>THE TEAM</h2>
-
-        <p>
-            Meet the people behind SYNTHENOVA.
-        </p>
-    </div>
-
-    <div id="publicTeamGrid" class="team-circle-grid">
-
-        <div class="team-loading">
-            LOADING TEAM...
-        </div>
-
-    </div>
-
+<div id="pageLoader" class="page-loader">
+<div class="loader-inner">
+<div class="loader-ring"></div>
+<span>SYNTHENOVA</span>
+<small>INITIALIZING</small>
+</div>
+</div>
+<!-- =====================================================
+BACKGROUND
+====================================================== -->
+<div class="grain"></div>
+<div class="bg-orb bg-orb-one"></div>
+<div class="bg-orb bg-orb-two"></div>
+<!-- =====================================================
+NAVBAR
+====================================================== -->
+<header class="topbar">
+<a
+href="#home"
+class="brand"
+>
+<div class="brand-logo">
+<img
+src="./images/logo.png"
+alt="SYNTHENOVA Logo"
+>
+</div>
+<div class="brand-info">
+<strong>SYNTHENOVA</strong>
+</div>
+</a>
+<nav class="desktop-nav">
+<a
+href="#home"
+class="nav-link active"
+>
+HOME
+</a>
+<a
+href="#about"
+class="nav-link"
+>
+ABOUT
+</a>
+<a
+href="#events"
+class="nav-link"
+>
+EVENTS
+</a>
+<a
+href="#team"
+class="nav-link"
+>
+TEAM
+</a>
+<a
+href="#gallery"
+class="nav-link"
+>
+GALLERY
+</a>
+<a
+href="#contact"
+class="nav-link"
+>
+CONTACT
+</a>
+</nav>
+<div class="nav-actions">
+<button
+id="loginButton"
+class="nav-pill"
+type="button"
+aria-haspopup="dialog"
+aria-controls="loginModal"
+>
+LOGIN
+</button>
+<button
+id="adminButton"
+class="nav-pill hidden"
+type="button"
+>
+ADMIN
+</button>
+<button
+id="logoutButton"
+class="nav-pill hidden"
+type="button"
+>
+LOGOUT
+</button>
+</div>
+<button
+id="menuButton"
+class="menu-button"
+type="button"
+aria-label="Open navigation menu"
+>
+<span></span>
+<span></span>
+<span></span>
+</button>
+</header>
+<!-- =====================================================
+SIDE MENU
+====================================================== -->
+<div
+id="menuOverlay"
+class="menu-overlay"
+></div>
+<aside
+id="sideMenu"
+class="side-menu"
+>
+<button
+id="closeMenu"
+class="side-menu-close"
+type="button"
+aria-label="Close menu"
+>
+×
+</button>
+<div class="side-menu-brand">
+<div class="side-logo">
+<img
+src="./images/logo.png"
+alt="SYNTHENOVA"
+>
+</div>
+<div>
+<strong>SYNTHENOVA</strong>
+<small>
+DIGITAL COMMUNITY
+</small>
+</div>
+</div>
+<div class="side-menu-label">
+NAVIGATION
+</div>
+<nav class="mobile-nav">
+<a href="#home">
+<span>01</span>
+HOME
+</a>
+<a href="#about">
+<span>02</span>
+ABOUT
+</a>
+<a href="#events">
+<span>03</span>
+EVENTS
+</a>
+<a href="#team">
+<span>04</span>
+TEAM
+</a>
+<a href="#gallery">
+<span>05</span>
+GALLERY
+</a>
+<a href="#contact">
+<span>06</span>
+CONTACT
+</a>
+</nav>
+<div class="side-auth">
+<button
+id="mobileLogin"
+type="button"
+>
+LOGIN
+</button>
+<button
+id="mobileAdmin"
+class="hidden"
+type="button"
+>
+ADMIN DASHBOARD
+</button>
+<button
+id="mobileLogout"
+class="hidden"
+type="button"
+>
+LOGOUT
+</button>
+</div>
+<div class="side-menu-footer">
+<span>
+SYNTHENOVA
+</span>
+<small>
+TECHNOLOGY • INNOVATION • CREATIVITY
+</small>
+</div>
+</aside>
+<!-- =====================================================
+MAIN
+====================================================== -->
+<main>
+<!-- =================================================
+HOME
+================================================== -->
+<section
+id="home"
+class="home-section"
+>
+<div class="home-label">
+<span class="status-dot"></span>
+SYNTHENOVA
+</div>
+<div class="hero-grid">
+<!-- HERO TEXT -->
+<div class="hero-content">
+<div class="hero-pill">
+</div>
+<h1 class="hero-title">
+<span>BUILD</span>
+<span class="hero-outline">
+BEYOND
+</span>
+<span>LIMITS.</span>
+</h1>
+<p class="hero-description">
+A student-driven technology community
+where ideas, creativity and innovation
+come together to build something new.
+</p>
+<div class="hero-buttons">
+<button
+id="joinButton"
+class="primary-button"
+type="button"
+>
+JOIN COMMUNITY
+<span>→</span>
+</button>
+<a
+href="#about"
+class="secondary-button"
+>
+EXPLORE
+<span>↓</span>
+</a>
+</div>
+<div class="hero-stats">
+<div>
+<strong>01</strong>
+<span>
+INNOVATION
+</span>
+</div>
+<div>
+<strong>02</strong>
+<span>
+CREATIVITY
+</span>
+</div>
+<div>
+<strong>03</strong>
+<span>
+COMMUNITY
+</span>
+</div>
+</div>
+</div>
+<!-- HERO VISUAL -->
+<div class="hero-visual">
+<div class="visual-label">
+<span>SYNTHENOVA</span>
+<small>EST. 1999</small>
+</div>
+</div>
+<div class="floating-symbol">
+■
+</div>
+</div>
+</div>
+<div class="scroll-indicator">
+<span>SCROLL</span>
+<strong>↓</strong>
+</div>
 </section>
-
-
+<!-- =================================================
+ABOUT
+================================================== -->
+<section
+id="about"
+class="content-section about-section"
+>
+<div class="section-heading">
+<div class="section-number">
+01
+</div>
+<div>
+<span class="section-label">
+WHO WE ARE
+</span>
+<h2>
+ABOUT
+<span>SYNTHENOVA</span>
+</h2>
+</div>
+</div>
+<div class="about-introduction">
+<div class="about-statement">
+<span>
+OUR IDEA
+</span>
+<h3>
+Technology is not
+just something we use.
+<em>
+It's something we create.
+</em>
+</h3>
+</div>
+<div class="about-text">
+<p>
+SYNTHENOVA is a student-driven
+technology and creativity community
+focused on learning, experimentation
+and innovation.
+</p>
+<p>
+We bring together curious minds
+interested in technology, electronics,
+artificial intelligence, design and
+digital creativity.
+</p>
+</div>
+</div>
+<div class="about-cards">
+<article class="info-card">
+<span class="card-number">
+01
+</span>
+<div class="card-icon">
+✦
+</div>
+<h3>
+INNOVATION
+</h3>
+<p>
+Exploring ideas and turning
+concepts into real experiences.
+</p>
+<span class="card-arrow">
+■
+</span>
+</article>
+<article class="info-card featured">
+<span class="card-number">
+02
+</span>
+<div class="card-icon">
+■
+</div>
+<h3>
+TECHNOLOGY
+</h3>
+<p>
+Learning and experimenting with
+emerging technologies.
+</p>
+<span class="card-arrow">
+■
+</span>
+</article>
+<article class="info-card">
+<span class="card-number">
+03
+</span>
+<div class="card-icon">
+■
+</div>
+<h3>
+CREATIVITY
+</h3>
+<p>
+Combining design, imagination and
+technology to create something new.
+</p>
+<span class="card-arrow">
+■
+</span>
+</article>
+<article class="info-card">
+<span class="card-number">
+04
+</span>
+<div class="card-icon">
+■
+</div>
+<h3>
+COMMUNITY
+</h3>
+<p>
+A place where curious minds connect,
+collaborate and grow together.
+</p>
+<span class="card-arrow">
+■
+</span>
+</article>
+</div>
+</section>
+<!-- =================================================
+EVENTS
+================================================== -->
+<section
+id="events"
+class="content-section events-section"
+>
+<div class="section-heading">
+<div class="section-number">
+02
+</div>
+<div>
+<span class="section-label">
+WHAT'S HAPPENING
+</span>
+<h2>
+EVENTS
+</h2>
+</div>
+</div>
+<div
+id="publicEventsGrid"
+class="events-layout"
+>
+<div class="events-loading">
+LOADING EVENTS...
+</div>
+</div>
+</section>
+<!-- =====================================================
+TEAM
+====================================================== -->
+<section id="team" class="team-section">
+<div class="section-header">
+<span class="section-kicker">SYNTHENOVA / OUR PEOPLE</span>
+<h2>THE TEAM</h2>
+<p>
+Meet the people behind SYNTHENOVA.
+</p>
+</div>
+<div id="publicTeamGrid" class="team-circle-grid">
+<div class="team-loading">
+LOADING TEAM...
+</div>
+</div>
+</section>
 <!-- =========================================================
-     TEAM PROFILE MODAL
-     ========================================================= -->
-
+TEAM PROFILE MODAL
+========================================================= -->
 <div id="teamProfileModal" class="team-profile-modal">
-
-    <div class="team-profile-box">
-
-        <button
-            type="button"
-            id="closeTeamProfile"
-            class="team-profile-close"
-        >
-            ×
-        </button>
-
-        <div class="team-profile-image-wrapper">
-
-            <img
-                id="teamProfileImage"
-                src=""
-                alt="Team Member"
-            >
-
-        </div>
-
-        <div class="team-profile-info">
-
-            <span
-                id="teamProfilePosition"
-                class="team-profile-position"
-            ></span>
-
-            <h2
-                id="teamProfileName"
-            ></h2>
-
-            <p
-                id="teamProfileClass"
-                class="team-profile-class"
-            ></p>
-
-            <span
-                id="teamProfileCategory"
-                class="team-profile-category"
-            ></span>
-
-        </div>
-
-    </div>
-
+<div class="team-profile-box">
+<button
+type="button"
+id="closeTeamProfile"
+class="team-profile-close"
+>
+×
+</button>
+<div class="team-profile-image-wrapper">
+<img
+id="teamProfileImage"
+src=""
+alt="Team Member"
+>
 </div>
- <!-- =================================================
-             GALLERY
-        ================================================== -->
-
-        <section
-            id="gallery"
-            class="content-section gallery-section"
-        >
-
-            <div class="section-heading">
-
-                <div class="section-number">
-                    04
-                </div>
-
-                <div>
-
-                    <span class="section-label">
-                        VISUAL ARCHIVE
-                    </span>
-
-                    <h2>
-                        GALLERY
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            <div class="gallery-header">
-
-                <div>
-
-                    <span>
-                        SYNTHENOVA
-                    </span>
-
-                    <h3>
-                        MOMENTS
-                    </h3>
-
-                </div>
-
-                <small>
-                    2026 / ARCHIVE
-                </small>
-
-            </div>
-
-
-            <div
-                id="galleryContainer"
-                class="gallery-grid"
-            >
-
-                <div class="gallery-placeholder">
-
-                    <div class="gallery-icon">
-                        ◈
-                    </div>
-
-                    <span>
-                        VISUAL ARCHIVE
-                    </span>
-
-                    <h3>
-                        WILL BE UPDATED SOON
-                    </h3>
-
-                    <p>
-                        Events, workshops and community
-                        moments will appear here.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             CONTACT
-        ================================================== -->
-
-        <section
-            id="contact"
-            class="contact-section"
-        >
-
-            <div class="contact-card">
-
-                <div class="contact-content">
-
-                    <span>
-                        SPECIAL COLLABORATION
-                    </span>
-
-                    <h2>
-                        LET'S
-                        <em>CREATE.</em>
-                    </h2>
-
-                    <p>
-
-                        Have an idea?
-                        Want to collaborate?
-                        Let's build something interesting.
-
-                    </p>
-
-                    <button
-                        id="contactJoinButton"
-                        class="light-button"
-                        type="button"
-                    >
-                        JOIN SYNTHENOVA
-
-                        <span>→</span>
-
-                    </button>
-
-                </div>
-
-
-                <div class="contact-symbol">
-                    ϟ
-                </div>
-
-            </div>
-
-
-            <div class="contact-links">
-
-
-                <a
-                    href="https://www.instagram.com/techy_ece_cps/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-
-                    <span>
-                        INSTAGRAM
-                    </span>
-
-                    <strong>
-                        @techy_ece_cps
-                    </strong>
-
-                    <b>
-                        ↗
-                    </b>
-
-                </a>
-
-
-                <div>
-
-                    <span>
-                        COMMUNITY
-                    </span>
-
-                    <strong>
-                        SYNTHENOVA
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        LOCATION
-                    </span>
-
-                    <strong>
-                        COLLEGE OF ENGINEERING KALLOOPPARA
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- =====================================================
-         TEAM PROFILE MODAL
-    ====================================================== -->
-
-    <div
-        id="teamProfile"
-        class="team-profile-overlay"
-    >
-
-        <div class="team-profile-card">
-
-            <button
-                id="closeTeamProfile"
-                class="profile-close"
-                type="button"
-                aria-label="Close profile"
-            >
-                ×
-            </button>
-
-
-            <div
-                id="profileImage"
-                class="profile-image"
-            ></div>
-
-
-            <div class="profile-content">
-
-                <span
-                    id="profileRole"
-                    class="profile-role"
-                ></span>
-
-                <h3
-                    id="profileName"
-                ></h3>
-
-                <p
-                    id="profileClass"
-                ></p>
-
-                <div class="profile-divider"></div>
-
-                <small>
-                    SYNTHENOVA TEAM
-                </small>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         JOIN COMMUNITY MODAL
-    ====================================================== -->
-
-    <div
-        id="joinModal"
-        class="modal-overlay"
-    >
-
-        <div class="modal-card">
-
-            <button
-                id="closeJoinModal"
-                class="modal-close"
-                type="button"
-                aria-label="Close"
-            >
-                ×
-            </button>
-
-
-            <span class="modal-label">
-                SYNTHENOVA / COMMUNITY
-            </span>
-
-
-            <h2>
-                JOIN
-                <em>US.</em>
-            </h2>
-
-
-            <p>
-                Enter your details and connect with
-                the SYNTHENOVA community.
-            </p>
-
-
-            <form id="joinForm">
-
-                <label for="memberName">
-                    NAME
-                </label>
-
-                <input
-                    id="memberName"
-                    type="text"
-                    placeholder="Your name"
-                    required
-                >
-
-
-                <label for="department">
-                    DEPARTMENT
-                </label>
-
-                <select
-                    id="department"
-                    required
-                >
-
-                    <option value="">
-                        Select department
-                    </option>
-
-                    <option value="CSE">
-                        CSE
-                    </option>
-
-                    <option value="EEE">
-                        EEE
-                    </option>
-
-                    <option value="EC">
-                        EC
-                    </option>
-
-                    <option value="CY">
-                        CY
-                    </option>
-
-                </select>
-
-
-                <button
-                    class="primary-button full-width"
-                    type="submit"
-                >
-                    CONTINUE
-
-                    <span>
-                        →
-                    </span>
-
-                </button>
-
-
-                <div
-                    id="formMessage"
-                    class="form-message"
-                ></div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ADMIN LOGIN MODAL
-    ====================================================== -->
-
-    <div
-        id="loginModal"
-        class="modal-overlay"
-    >
-
-        <div class="modal-card">
-
-            <button
-                id="closeLoginModal"
-                class="modal-close"
-                type="button"
-                aria-label="Close"
-            >
-                ×
-            </button>
-
-
-            <span class="modal-label">
-                SYNTHENOVA / SECURE ACCESS
-            </span>
-
-
-            <h2>
-                ADMIN
-                <em>LOGIN.</em>
-            </h2>
-
-
-            <p>
-                Authorized users only.
-            </p>
-
-
-            <form id="loginForm">
-
-                <label for="loginEmail">
-                    EMAIL
-                </label>
-
-                <input
-                    id="loginEmail"
-                    type="email"
-                    placeholder="Admin email"
-                    autocomplete="username"
-                    required
-                >
-
-
-                <label for="loginPassword">
-                    PASSWORD
-                </label>
-
-                <input
-                    id="loginPassword"
-                    type="password"
-                    placeholder="Password"
-                    autocomplete="current-password"
-                    required
-                >
-
-
-                <button
-                    id="loginSubmitButton"
-                    class="primary-button full-width"
-                    type="submit"
-                >
-                    AUTHENTICATE
-
-                    <span>
-                        →
-                    </span>
-
-                </button>
-
-
-                <div
-                    id="loginMessage"
-                    class="form-message"
-                ></div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         ADMIN DASHBOARD
-    ====================================================== -->
-
+<div class="team-profile-info">
+<span
+id="teamProfilePosition"
+class="team-profile-position"
+></span>
+<h2
+id="teamProfileName"
+></h2>
+<p
+id="teamProfileClass"
+class="team-profile-class"
+></p>
+<span
+id="teamProfileCategory"
+class="team-profile-category"
+></span>
+</div>
+</div>
+</div>
+<!-- =================================================
+GALLERY
+================================================== -->
+<section
+id="gallery"
+class="content-section gallery-section"
+>
+<div class="section-heading">
+<div class="section-number">
+04
+</div>
+<div>
+<span class="section-label">
+VISUAL ARCHIVE
+</span>
+<h2>
+GALLERY
+</h2>
+</div>
+</div>
+<div class="gallery-header">
+<div>
+<span>
+SYNTHENOVA
+</span>
+<h3>
+MOMENTS
+</h3>
+</div>
+<small>
+2026 / ARCHIVE
+</small>
+</div>
+<div
+id="galleryContainer"
+class="gallery-grid"
+>
+<div class="gallery-placeholder">
+<div class="gallery-icon">
+■
+</div>
+<span>
+VISUAL ARCHIVE
+</span>
+<h3>
+WILL BE UPDATED SOON
+</h3>
+<p>
+Events, workshops and community
+moments will appear here.
+</p>
+</div>
+</div>
+</section>
+<!-- =================================================
+CONTACT
+================================================== -->
+<section
+id="contact"
+class="contact-section"
+>
+<div class="contact-card">
+<div class="contact-content">
+<span>
+SPECIAL COLLABORATION
+</span>
+<h2>
+LET'S
+<em>CREATE.</em>
+</h2>
+<p>
+Have an idea?
+Want to collaborate?
+Let's build something interesting.
+</p>
+<button
+id="contactJoinButton"
+class="light-button"
+type="button"
+>
+JOIN SYNTHENOVA
+<span>→</span>
+</button>
+</div>
+<div class="contact-symbol">
+■
+</div>
+</div>
+<div class="contact-links">
+<a
+href="https://www.instagram.com/techy_ece_cps/"
+target="_blank"
+rel="noopener noreferrer"
+>
+<span>
+INSTAGRAM
+</span>
+<strong>
+@techy_ece_cps
+</strong>
+<b>
+■
+</b>
+</a>
+<div>
+<span>
+COMMUNITY
+</span>
+<strong>
+SYNTHENOVA
+</strong>
+</div>
+<div>
+<span>
+LOCATION
+</span>
+<strong>
+COLLEGE OF ENGINEERING KALLOOPPARA
+</strong>
+</div>
+</div>
+</section>
+</main>
 <!-- =====================================================
-     ADMIN CONTROL CENTER
+TEAM PROFILE MODAL
 ====================================================== -->
-
+<div
+id="teamProfile"
+class="team-profile-overlay"
+>
+<div class="team-profile-card">
+<button
+id="closeTeamProfile"
+class="profile-close"
+type="button"
+aria-label="Close profile"
+>
+×
+</button>
+<div
+id="profileImage"
+class="profile-image"
+></div>
+<div class="profile-content">
+<span
+id="profileRole"
+class="profile-role"
+></span>
+<h3
+id="profileName"
+></h3>
+<p
+id="profileClass"
+></p>
+<div class="profile-divider"></div>
+<small>
+SYNTHENOVA TEAM
+</small>
+</div>
+</div>
+</div>
+<!-- =====================================================
+JOIN COMMUNITY MODAL
+====================================================== -->
+<div
+id="joinModal"
+class="modal-overlay"
+>
+<div class="modal-card">
+<button
+id="closeJoinModal"
+class="modal-close"
+type="button"
+aria-label="Close"
+>
+×
+</button>
+<span class="modal-label">
+SYNTHENOVA / COMMUNITY
+</span>
+<h2>
+JOIN
+<em>US.</em>
+</h2>
+<p>
+Enter your details and connect with
+the SYNTHENOVA community.
+</p>
+<form id="joinForm">
+<label for="memberName">
+NAME
+</label>
+<input
+id="memberName"
+type="text"
+placeholder="Your name"
+required
+>
+<label for="department">
+DEPARTMENT
+</label>
+<select
+id="department"
+required
+>
+<option value="">
+Select department
+</option>
+<option value="CSE">
+CSE
+</option>
+<option value="EEE">
+EEE
+</option>
+<option value="EC">
+EC
+</option>
+<option value="CY">
+CY
+</option>
+</select>
+<button
+class="primary-button full-width"
+type="submit"
+>
+CONTINUE
+<span>
+→
+</span>
+</button>
+<div
+id="formMessage"
+class="form-message"
+></div>
+</form>
+</div>
+</div>
+<!-- =====================================================
+ADMIN LOGIN MODAL
+====================================================== -->
+<div
+id="loginModal"
+class="modal-overlay"
+>
+<div class="modal-card">
+<button
+id="closeLoginModal"
+class="modal-close"
+type="button"
+aria-label="Close"
+>
+×
+</button>
+<span class="modal-label">
+SYNTHENOVA / SECURE ACCESS
+</span>
+<h2>
+ADMIN
+<em>LOGIN.</em>
+</h2>
+<p>
+Authorized users only.
+</p>
+<form id="loginForm">
+<label for="loginEmail">
+EMAIL
+</label>
+<input
+id="loginEmail"
+type="email"
+placeholder="Admin email"
+autocomplete="username"
+required
+>
+<label for="loginPassword">
+PASSWORD
+</label>
+<input
+id="loginPassword"
+type="password"
+placeholder="Password"
+autocomplete="current-password"
+required
+>
+<button
+id="loginSubmitButton"
+class="primary-button full-width"
+type="submit"
+>
+AUTHENTICATE
+<span>
+→
+</span>
+</button>
+<div
+id="loginMessage"
+class="form-message"
+></div>
+</form>
+</div>
+</div>
+<!-- =====================================================
+ADMIN DASHBOARD
+====================================================== -->
+<!-- =====================================================
+ADMIN CONTROL CENTER
+====================================================== -->
 <div id="adminDashboard" class="admin-overlay">
-
-    <div class="admin-panel">
-
-        <!-- HEADER -->
-
-        <div class="admin-header">
-
-            <div class="admin-header-title">
-
-                <span>
-                    SYNTHENOVA / CONTROL CENTER
-                </span>
-
-                <h2>
-                    ADMIN DASHBOARD
-                </h2>
-
-                <small id="adminUserEmail">
-                    AUTHENTICATED ADMIN
-                </small>
-
-            </div>
-
-
-            <div class="admin-header-actions">
-
-                <button
-                    id="dashboardLogout"
-                    type="button"
-                >
-                    LOGOUT
-                </button>
-
-                <button
-                    id="closeDashboard"
-                    type="button"
-                    aria-label="Close dashboard"
-                >
-                    ×
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- STATS -->
-
-        <div class="admin-body">
-
-            <div class="admin-stats">
-
-                <button
-                    class="admin-stat"
-                    data-admin-tab="team"
-                    type="button"
-                >
-
-                    <span>
-                        TEAM
-                    </span>
-
-                    <strong id="teamCount">
-                        0
-                    </strong>
-
-                    <small>
-                        MANAGE →
-                    </small>
-
-                </button>
-
-
-                <button
-                    class="admin-stat"
-                    data-admin-tab="events"
-                    type="button"
-                >
-
-                    <span>
-                        EVENTS
-                    </span>
-
-                    <strong id="eventCount">
-                        0
-                    </strong>
-
-                    <small>
-                        MANAGE →
-                    </small>
-
-                </button>
-
-
-                <button
-                    class="admin-stat"
-                    data-admin-tab="gallery"
-                    type="button"
-                >
-
-                    <span>
-                        GALLERY
-                    </span>
-
-                    <strong id="galleryCount">
-                        0
-                    </strong>
-
-                    <small>
-                        MANAGE →
-                    </small>
-
-                </button>
-
-            </div>
-
-
-            <!-- STATUS -->
-
-            <div class="admin-status">
-
-                <span>
-                    SYSTEM STATUS
-                </span>
-
-                <strong>
-                    ● AUTHENTICATED
-                </strong>
-
-            </div>
-
-
-            <!-- TABS -->
-
-            <div class="admin-tabs">
-
-                <button
-                    class="admin-tab active"
-                    data-admin-tab="team"
-                    type="button"
-                >
-                    TEAM
-                </button>
-
-                <button
-                    class="admin-tab"
-                    data-admin-tab="events"
-                    type="button"
-                >
-                    EVENTS
-                </button>
-
-                <button
-                    class="admin-tab"
-                    data-admin-tab="gallery"
-                    type="button"
-                >
-                    GALLERY
-                </button>
-
-            </div>
-
-
-            <!-- =================================================
-                 TEAM PANEL
-            ================================================== -->
-
-            <section
-                id="adminTeamPanel"
-                class="admin-management-panel active"
-            >
-
-                <div class="management-header">
-
-                    <div>
-
-                        <span>
-                            TEAM MANAGEMENT
-                        </span>
-
-                        <h3>
-                            TEAM MEMBERS
-                        </h3>
-
-                        <p>
-                            Add, edit and remove SYNTHENOVA
-                            team members.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        id="addTeamButton"
-                        class="admin-primary-button"
-                        type="button"
-                    >
-                        + ADD MEMBER
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="adminTeamList"
-                    class="admin-data-list"
-                >
-
-                    <div class="admin-loading">
-                        LOADING TEAM...
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 EVENTS PANEL
-            ================================================== -->
-
-            <section
-                id="adminEventsPanel"
-                class="admin-management-panel"
-            >
-
-                <div class="management-header">
-
-                    <div>
-
-                        <span>
-                            EVENT MANAGEMENT
-                        </span>
-
-                        <h3>
-                            EVENTS
-                        </h3>
-
-                        <p>
-                            Create and manage SYNTHENOVA events.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        id="addEventButton"
-                        class="admin-primary-button"
-                        type="button"
-                    >
-                        + ADD EVENT
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="adminEventsList"
-                    class="admin-data-list"
-                >
-
-                    <div class="admin-loading">
-                        LOADING EVENTS...
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 GALLERY PANEL
-            ================================================== -->
-
-            <section
-                id="adminGalleryPanel"
-                class="admin-management-panel"
-            >
-
-                <div class="management-header">
-
-                    <div>
-
-                        <span>
-                            GALLERY MANAGEMENT
-                        </span>
-
-                        <h3>
-                            GALLERY
-                        </h3>
-
-                        <p>
-                            Upload and manage SYNTHENOVA
-                            gallery images.
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        id="addGalleryButton"
-                        class="admin-primary-button"
-                        type="button"
-                    >
-                        + ADD IMAGE
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="adminGalleryList"
-                    class="admin-gallery-list"
-                >
-
-                    <div class="admin-loading">
-                        LOADING GALLERY...
-                    </div>
-
-                </div>
-
-            </section>
-
-        </div>
-
-    </div>
-
+<div class="admin-panel">
+<!-- HEADER -->
+<div class="admin-header">
+<div class="admin-header-title">
+<span>
+SYNTHENOVA / CONTROL CENTER
+</span>
+<h2>
+ADMIN DASHBOARD
+</h2>
+<small id="adminUserEmail">
+AUTHENTICATED ADMIN
+</small>
 </div>
-
-
-<!-- =====================================================
-     TEAM EDIT MODAL
-====================================================== -->
-
-<div
-    id="teamAdminModal"
-    class="admin-form-overlay"
+<div class="admin-header-actions">
+<button
+id="dashboardLogout"
+type="button"
 >
-
-    <div class="admin-form-card">
-
-        <button
-            id="closeTeamAdminModal"
-            class="admin-form-close"
-            type="button"
-        >
-            ×
-        </button>
-
-
-        <span>
-            SYNTHENOVA / TEAM
-        </span>
-
-        <h3 id="teamModalTitle">
-            ADD MEMBER
-        </h3>
-
-
-        <form id="teamAdminForm">
-
-            <label>
-                NAME
-            </label>
-
-            <input
-                id="adminTeamName"
-                type="text"
-                placeholder="Member name"
-                required
-            >
-
-
-            <label>
-                POSITION
-            </label>
-
-            <input
-                id="adminTeamPosition"
-                type="text"
-                placeholder="Chairman / Secretary / Design..."
-                required
-            >
-
-
-            <label>
-                CLASS
-            </label>
-
-            <input
-                id="adminTeamClass"
-                type="text"
-                placeholder="class "
-            >
-
-
-            <label>
-                CATEGORY
-            </label>
-
-            <select id="adminTeamCategory">
-
-                <option value="leadership">
-                    Leadership
-                </option>
-
-                <option value="secretariat">
-                    Secretariat
-                </option>
-
-                <option value="secretariat">
-                    Treasurer
-                </option>
-
-                <option value="media">
-                    Media
-                </option>
-
-                <option value="pitching">
-                    Pitching
-                </option>
-
-                <option value="design">
-                    Design
-                </option>
-
-                <option value="general">
-                    General
-                </option>
-
-            </select>
-
-
-            <label>
-                DISPLAY ORDER
-            </label>
-
-            <input
-                id="adminTeamOrder"
-                type="number"
-                value="0"
-            >
-
-
-            <label>
-                PHOTO
-            </label>
-
-            <input
-                id="adminTeamPhoto"
-                type="file"
-                accept="image/*"
-            >
-
-
-            <label class="admin-checkbox">
-
-                <input
-                    id="adminTeamActive"
-                    type="checkbox"
-                    checked
-                >
-
-                <span>
-                    ACTIVE MEMBER
-                </span>
-
-            </label>
-
-
-            <button
-                id="saveTeamButton"
-                class="admin-primary-button full-width"
-                type="submit"
-            >
-                SAVE MEMBER
-            </button>
-
-
-            <div
-                id="teamAdminMessage"
-                class="admin-form-message"
-            ></div>
-
-        </form>
-
-    </div>
-
+LOGOUT
+</button>
+<button
+id="closeDashboard"
+type="button"
+aria-label="Close dashboard"
+>
+×
+</button>
 </div>
-
-
-<!-- =====================================================
-     EVENT EDIT MODAL
-====================================================== -->
-
-<div
-    id="eventAdminModal"
-    class="admin-form-overlay"
+</div>
+<!-- STATS -->
+<div class="admin-body">
+<div class="admin-stats">
+<button
+class="admin-stat"
+data-admin-tab="team"
+type="button"
 >
-
-    <div class="admin-form-card">
-
-        <button
-            id="closeEventAdminModal"
-            class="admin-form-close"
-            type="button"
-        >
-            ×
-        </button>
-
-
-        <span>
-            SYNTHENOVA / EVENTS
-        </span>
-
-        <h3 id="eventModalTitle">
-            ADD EVENT
-        </h3>
-
-
-        <form id="eventAdminForm">
-
-            <label>
-                EVENT TITLE
-            </label>
-
-            <input
-                id="adminEventTitle"
-                type="text"
-                placeholder="Event title"
-                required
-            >
-
-
-            <label>
-                EVENT DATE
-            </label>
-
-            <input
-                id="adminEventDate"
-                type="date"
-                required
-            >
+<span>
+TEAM
+</span>
+<strong id="teamCount">
+0
+</strong>
+<small>
+MANAGE →
+</small>
+</button>
+<button
+class="admin-stat"
+data-admin-tab="events"
+type="button"
+>
+<span>
+EVENTS
+</span>
+<strong id="eventCount">
+0
+</strong>
+<small>
+MANAGE →
+</small>
+</button>
+<button
+class="admin-stat"
+data-admin-tab="gallery"
+type="button"
+>
+<span>
+GALLERY
+</span>
+<strong id="galleryCount">
+0
+</strong>
+<small>
+MANAGE →
+</small>
+</button>
+</div>
+<!-- STATUS -->
+<div class="admin-status">
+<span>
+SYSTEM STATUS
+</span>
+<strong>
+● AUTHENTICATED
+</strong>
+</div>
+<!-- TABS -->
+<div class="admin-tabs">
+<button
+class="admin-tab active"
+data-admin-tab="team"
+type="button"
+>
+TEAM
+</button>
+<button
+class="admin-tab"
+data-admin-tab="events"
+type="button"
+>
+EVENTS
+</button>
+<button
+class="admin-tab"
+data-admin-tab="gallery"
+type="button"
+>
+GALLERY
+</button>
+</div>
+<!-- =================================================
+TEAM PANEL
+================================================== -->
+<section
+id="adminTeamPanel"
+class="admin-management-panel active"
+>
+<div class="management-header">
+<div>
+<span>
+TEAM MANAGEMENT
+</span>
+<h3>
+TEAM MEMBERS
+</h3>
+<p>
+Add, edit and remove SYNTHENOVA
+team members.
+</p>
+</div>
+<button
+id="addTeamButton"
+class="admin-primary-button"
+type="button"
+>
++ ADD MEMBER
+</button>
+</div>
+<div
+id="adminTeamList"
+class="admin-data-list"
+>
+<div class="admin-loading">
+LOADING TEAM...
+</div>
+</div>
+</section>
+<!-- =================================================
+EVENTS PANEL
+================================================== -->
+<section
+id="adminEventsPanel"
+class="admin-management-panel"
+>
+<div class="management-header">
+<div>
+<span>
+EVENT MANAGEMENT
+</span>
+<h3>
+EVENTS
+</h3>
+<p>
+Create and manage SYNTHENOVA events.
+</p>
+</div>
+<button
+id="addEventButton"
+class="admin-primary-button"
+type="button"
+>
++ ADD EVENT
+</button>
+</div>
+<div
+id="adminEventsList"
+class="admin-data-list"
+>
+<div class="admin-loading">
+LOADING EVENTS...
+</div>
+</div>
+</section>
+<!-- =================================================
+GALLERY PANEL
+================================================== -->
+<section
+id="adminGalleryPanel"
+class="admin-management-panel"
+>
+<div class="management-header">
+<div>
+<span>
+GALLERY MANAGEMENT
+</span>
+<h3>
+GALLERY
+</h3>
+<p>
+Upload and manage SYNTHENOVA
+gallery images.
+</p>
+</div>
+<button
+id="addGalleryButton"
+class="admin-primary-button"
+type="button"
+>
++ ADD IMAGE
+</button>
+</div>
+<div
+id="adminGalleryList"
+class="admin-gallery-list"
+>
+<div class="admin-loading">
+LOADING GALLERY...
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<!-- =====================================================
+TEAM EDIT MODAL
+====================================================== -->
+<div
+id="teamAdminModal"
+class="admin-form-overlay"
+>
+<div class="admin-form-card">
+<button
+id="closeTeamAdminModal"
+class="admin-form-close"
+type="button"
+>
+×
+</button>
+<span>
+SYNTHENOVA / TEAM
+</span>
+<h3 id="teamModalTitle">
+ADD MEMBER
+</h3>
+<form id="teamAdminForm">
+<label>
+NAME
+</label>
+<input
+id="adminTeamName"
+type="text"
+placeholder="Member name"
+required
+>
+<label>
+POSITION
+</label>
+<input
+id="adminTeamPosition"
+type="text"
+placeholder="Chairman / Secretary / Design..."
+required
+>
+<label>
+CLASS
+</label>
+<input
+id="adminTeamClass"
+type="text"
+placeholder="class "
+>
+<label>
+CATEGORY
+</label>
+<select id="adminTeamCategory">
+<option value="leadership">
+Leadership
+</option>
+<option value="secretariat">
+Secretariat
+</option>
+<option value="secretariat">
+Treasurer
+</option>
+<option value="media">
+Media
+</option>
+<option value="pitching">
+Pitching
+</option>
+<option value="design">
+Design
+</option>
+<option value="general">
+General
+</option>
+</select>
+<label>
+DISPLAY ORDER
+</label>
+<input
+id="adminTeamOrder"
+type="number"
+value="0"
+>
+<label>
+PHOTO
+</label>
+<input
+id="adminTeamPhoto"
+type="file"
+accept="image/*"
+>
+<label class="admin-checkbox">
+<input
+id="adminTeamActive"
+type="checkbox"
+checked
+>
+<span>
+ACTIVE MEMBER
+</span>
+</label>
+<button
+id="saveTeamButton"
+class="admin-primary-button full-width"
+type="submit"
+>
+SAVE MEMBER
+</button>
+<div
+id="teamAdminMessage"
+class="admin-form-message"
+></div>
+</form>
+</div>
+</div>
+<!-- =====================================================
+EVENT EDIT MODAL
+====================================================== -->
+<div
+id="eventAdminModal"
+class="admin-form-overlay"
+>
+<div class="admin-form-card">
+<button
+id="closeEventAdminModal"
+class="admin-form-close"
+type="button"
+>
+×
+</button>
+<span>
+SYNTHENOVA / EVENTS
+</span>
+<h3 id="eventModalTitle">
+ADD EVENT
+</h3>
+<form id="eventAdminForm">
+<label>
+EVENT TITLE
+</label>
+<input
+id="adminEventTitle"
+type="text"
+placeholder="Event title"
+required
+>
+<label>
+EVENT DATE
+</label>
+<input
+id="adminEventDate"
+type="date"
+required
+>
 <div class="admin-form-group">
-    <label for="adminEventRegistration">Google Form Registration Link</label>
-    <input
-        type="url"
-        id="adminEventRegistration"
-        placeholder="https://forms.gle/ABC123xyz"
-        autocomplete="url"
-    >
-    <small>
-        Paste the Google Form link. It will be connected to the public REGISTER NOW button.
-    </small>
-</div>
-
-            <label>
-                DESCRIPTION
-            </label>
-
-            <textarea
-                id="adminEventDescription"
-                placeholder="Event description"
-                rows="5"
-            ></textarea>
-
-
-            <label>
-                POSTER IMAGE
-            </label>
-
-            <input
-                id="adminEventPoster"
-                type="file"
-                accept="image/*"
-            >
-
-
-            <label>
-                DISPLAY ORDER
-            </label>
-
-            <input
-                id="adminEventOrder"
-                type="number"
-                value="0"
-            >
-
-
-            <label class="admin-checkbox">
-
-                <input
-                    id="adminEventPublished"
-                    type="checkbox"
-                    checked
-                >
-
-                <span>
-                    PUBLISHED
-                </span>
-
-            </label>
-
-
-            <button
-                id="saveEventButton"
-                class="admin-primary-button full-width"
-                type="submit"
-            >
-                SAVE EVENT
-            </button>
-
-
-            <div
-                id="eventAdminMessage"
-                class="admin-form-message"
-            ></div>
-
-        </form>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     GALLERY MODAL
-====================================================== -->
-
-<div
-    id="galleryAdminModal"
-    class="admin-form-overlay"
+<label for="adminEventRegistration">Google Form Registration Link</label>
+<input
+type="url"
+id="adminEventRegistration"
+placeholder="https://forms.gle/ABC123xyz"
+autocomplete="url"
 >
-
-    <div class="admin-form-card">
-
-        <button
-            id="closeGalleryAdminModal"
-            class="admin-form-close"
-            type="button"
-        >
-            ×
-        </button>
-
-
-        <span>
-            SYNTHENOVA / GALLERY
-        </span>
-
-        <h3 id="galleryModalTitle">
-            ADD GALLERY IMAGES
-        </h3>
-
-
-        <form id="galleryAdminForm">
-
-            <label>
-                IMAGE
-            </label>
-
-            <input
-                id="adminGalleryImage"
-                type="file"
-                accept="image/*"
-                multiple
-            >
-
-            <small class="admin-form-help">
-                You can select multiple images at once. Each image will be added to the gallery separately.
-            </small>
-
-
-            <label>
-                CAPTION
-            </label>
-
-            <input
-                id="adminGalleryCaption"
-                type="text"
-                placeholder="Image caption"
-            >
-
-
-            <label>
-                DISPLAY ORDER
-            </label>
-
-            <input
-                id="adminGalleryOrder"
-                type="number"
-                value="0"
-            >
-
-
-            <label class="admin-checkbox">
-
-                <input
-                    id="adminGalleryPublished"
-                    type="checkbox"
-                    checked
-                >
-
-                <span>
-                    PUBLISHED
-                </span>
-
-            </label>
-
-
-            <button
-                class="admin-primary-button full-width"
-                type="submit"
-            >
-                UPLOAD IMAGES
-            </button>
-
-
-            <div
-                id="galleryAdminMessage"
-                class="admin-form-message"
-            ></div>
-
-        </form>
-
-    </div>
-
+<small>
+Paste the Google Form link. It will be connected to the public REGISTER NOW button.
+</small>
 </div>
- 
-
-
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
-
-    <footer class="footer">
-
-        <div class="footer-brand">
-
-            <div class="footer-logo">
-
-                <img
-                    src="./images/logo.png"
-                    alt="SYNTHENOVA"
-                >
-
-            </div>
-
-            <strong>
-                SYNTHENOVA
-            </strong>
-
-        </div>
-
-
-        <span>
-            TECHNOLOGY • INNOVATION • CREATIVITY
-        </span>
-
-
-        <small>
-            © 2026 SYNTHENOVA
-        </small>
-
-    </footer>
-
-
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
-
-      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <script src="./js/script.js"></script>
+<label>
+DESCRIPTION
+</label>
+<textarea
+id="adminEventDescription"
+placeholder="Event description"
+rows="5"
+></textarea>
+<label>
+POSTER IMAGE
+</label>
+<input
+id="adminEventPoster"
+type="file"
+accept="image/*"
+>
+<label>
+DISPLAY ORDER
+</label>
+<input
+id="adminEventOrder"
+type="number"
+value="0"
+>
+<label class="admin-checkbox">
+<input
+id="adminEventPublished"
+type="checkbox"
+checked
+>
+<span>
+PUBLISHED
+</span>
+</label>
+<button
+id="saveEventButton"
+class="admin-primary-button full-width"
+type="submit"
+>
+SAVE EVENT
+</button>
+<div
+id="eventAdminMessage"
+class="admin-form-message"
+></div>
+</form>
+</div>
+</div>
+<!-- =====================================================
+GALLERY MODAL
+====================================================== -->
+<div
+id="galleryAdminModal"
+class="admin-form-overlay"
+>
+<div class="admin-form-card">
+<button
+id="closeGalleryAdminModal"
+class="admin-form-close"
+type="button"
+>
+×
+</button>
+<span>
+SYNTHENOVA / GALLERY
+</span>
+<h3 id="galleryModalTitle">
+ADD GALLERY IMAGES
+</h3>
+<form id="galleryAdminForm">
+<label>
+IMAGE
+</label>
+<input
+id="adminGalleryImage"
+type="file"
+accept="image/*"
+multiple
+>
+<small class="admin-form-help">
+You can select multiple images at once. Each image will be added to the gallery separately.
+</small>
+<label>
+CAPTION
+</label>
+<input
+id="adminGalleryCaption"
+type="text"
+placeholder="Image caption"
+>
+<label>
+DISPLAY ORDER
+</label>
+<input
+id="adminGalleryOrder"
+type="number"
+value="0"
+>
+<label class="admin-checkbox">
+<input
+id="adminGalleryPublished"
+type="checkbox"
+checked
+>
+<span>
+PUBLISHED
+</span>
+</label>
+<button
+class="admin-primary-button full-width"
+type="submit"
+>
+UPLOAD IMAGES
+</button>
+<div
+id="galleryAdminMessage"
+class="admin-form-message"
+></div>
+</form>
+</div>
+</div>
+<!-- =====================================================
+FOOTER
+====================================================== -->
+<footer class="footer">
+<div class="footer-brand">
+<div class="footer-logo">
+<img
+src="./images/logo.png"
+alt="SYNTHENOVA"
+>
+</div>
+<strong>
+SYNTHENOVA
+</strong>
+</div>
+<span>
+TECHNOLOGY • INNOVATION • CREATIVITY
+</span>
+<small>
+© 2026 SYNTHENOVA
+</small>
+</footer>
+<!-- =====================================================
+JAVASCRIPT
+====================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./js/script.js"></script>
 </body>
-
 </html>
