@@ -6366,3 +6366,39 @@ a {
 .side-auth button.hidden {
     display: none !important;
 }
+/* =========================================================
+   MOBILE ADMIN DASHBOARD — CLEAR NAVBAR
+========================================================= */
+
+@media (max-width: 750px) {
+
+    #adminDashboard {
+        top: 70px !important;
+        height: calc(100dvh - 70px) !important;
+        padding: 8px !important;
+    }
+
+    #adminDashboard .admin-panel {
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+
+    #adminDashboard .admin-header {
+        position: relative !important;
+        top: auto !important;
+    }
+
+    #adminDashboard #closeDashboard {
+        position: relative !important;
+        z-index: 100 !important;
+
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+}
