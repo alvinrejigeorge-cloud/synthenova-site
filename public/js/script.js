@@ -1,4 +1,3 @@
-
 "use strict";
 /* =========================================================
 SYNTHENOVA
@@ -1112,36 +1111,26 @@ if (!countElement) {
 return;
 }
 if (!supabaseClient) {
-countElement.textContent =
-"0";
+countElement.textContent = "0";
 return;
 }
 try {
-const {
-count,
-error
-} =
+const { data, error } =
 await supabaseClient
 .from("gallery")
-.select(
-"id",
-{
-count: "exact",
-head: true
-}
-);
+.select("id, album_id, album_title, caption");
 if (error) {
 throw error;
 }
+const albums = groupGalleryAlbums(data || []);
 countElement.textContent =
-String(count || 0);
+String(albums.length);
 } catch (error) {
 console.error(
 "Gallery count error:",
 error
 );
-countElement.textContent =
-"0";
+countElement.textContent = "0";
 }
 }
 /* =========================================================
@@ -2141,38 +2130,29 @@ UNABLE TO LOAD TEAM.
 /* =========================================================
 OPEN TEAM PROFILE
 ========================================================= */
-function openTeamProfile(
-member
-) {
+function openTeamProfile(member) {
 const profile =
-$("teamProfile");
+$("teamProfileModal");
 if (!profile) {
 return;
 }
 const image =
-$("profileImage");
+$("teamProfileImage");
 const role =
-$("profileRole");
+$("teamProfilePosition");
 const name =
-$("profileName");
+$("teamProfileName");
 const className =
-$("profileClass");
+$("teamProfileClass");
 const category =
-$("profileCategory");
+$("teamProfileCategory");
 if (image) {
-if (
-member.photo_url
-) {
-image.style.backgroundImage =
-`url("${member.photo_url}")`;
-image.style.backgroundSize =
-"cover";
-image.style.backgroundPosition =
-"center";
-} else {
-image.style.backgroundImage =
-"none";
-}
+image.src =
+member.photo_url ||
+"";
+image.alt =
+member.name ||
+"SYNTHENOVA team member";
 }
 if (role) {
 role.textContent =
@@ -2197,6 +2177,10 @@ member.category ||
 profile.classList.add(
 "active"
 );
+profile.setAttribute(
+"aria-hidden",
+"false"
+);
 body.classList.add(
 "modal-open"
 );
@@ -2206,10 +2190,14 @@ CLOSE TEAM PROFILE
 ========================================================= */
 function closeTeamProfile() {
 const profile =
-$("teamProfile");
+$("teamProfileModal");
 if (profile) {
 profile.classList.remove(
 "active"
+);
+profile.setAttribute(
+"aria-hidden",
+"true"
 );
 }
 body.classList.remove(
@@ -2224,11 +2212,14 @@ $("closeTeamProfile");
 if (closeTeamProfileButton) {
 closeTeamProfileButton.addEventListener(
 "click",
-closeTeamProfile
+event => {
+event.preventDefault();
+closeTeamProfile();
+}
 );
 }
 const teamProfile =
-$("teamProfile");
+$("teamProfileModal");
 if (teamProfile) {
 teamProfile.addEventListener(
 "click",
@@ -2242,6 +2233,19 @@ closeTeamProfile();
 }
 );
 }
+document.addEventListener(
+"keydown",
+event => {
+if (event.key !== "Escape") {
+return;
+}
+const profile = $("teamProfileModal");
+if (profile?.classList.contains("active")) {
+event.preventDefault();
+closeTeamProfile();
+}
+});
+
 /* =========================================================
 EVENTS ADMIN SETUP
 ========================================================= */
@@ -3209,8 +3213,6 @@ const modal =
 $("galleryAdminModal");
 const closeButton =
 $("closeGalleryAdminModal");
-const cancelButton =
-$("cancelGalleryAdmin");
 const form =
 $("galleryAdminForm");
 if (addButton) {
@@ -3231,23 +3233,11 @@ closeGalleryAdminModal();
 }
 );
 }
-if (cancelButton) {
-cancelButton.addEventListener(
-"click",
-event => {
-event.preventDefault();
-closeGalleryAdminModal();
-}
-);
-}
 if (modal) {
 modal.addEventListener(
 "click",
 event => {
-if (
-event.target ===
-modal
-) {
+if (event.target === modal) {
 closeGalleryAdminModal();
 }
 }
@@ -3258,138 +3248,186 @@ form.addEventListener(
 "submit",
 async event => {
 event.preventDefault();
-await saveGalleryItems();
+await saveGalleryAlbum();
 }
 );
 }
+const albumClose =
+$("galleryAlbumClose");
+if (albumClose) {
+albumClose.addEventListener(
+"click",
+event => {
+event.preventDefault();
+closeGalleryAlbum();
+}
+);
+}
+const albumModal =
+$("galleryAlbumModal");
+if (albumModal) {
+albumModal.addEventListener(
+"click",
+event => {
+if (event.target === albumModal) {
+closeGalleryAlbum();
+}
+}
+);
+}
+const lightboxClose =
+$("galleryLightboxClose");
+const lightbox =
+$("galleryLightbox");
+const lightboxPrev =
+$("galleryLightboxPrev");
+const lightboxNext =
+$("galleryLightboxNext");
+if (lightboxClose) {
+lightboxClose.addEventListener(
+"click",
+event => {
+event.preventDefault();
+closeGalleryLightbox();
+}
+);
+}
+if (lightbox) {
+lightbox.addEventListener(
+"click",
+event => {
+if (event.target === lightbox) {
+closeGalleryLightbox();
+}
+}
+);
+}
+if (lightboxPrev) {
+lightboxPrev.addEventListener(
+"click",
+event => {
+event.preventDefault();
+showPreviousGalleryImage();
+}
+);
+}
+if (lightboxNext) {
+lightboxNext.addEventListener(
+"click",
+event => {
+event.preventDefault();
+showNextGalleryImage();
+}
+);
+}
+const gallerySeeAllButton = $("gallerySeeAllButton");
+if (gallerySeeAllButton) {
+    gallerySeeAllButton.addEventListener("click", event => {
+        event.preventDefault();
+        if (activeGalleryAlbum) renderGalleryInlineAlbum(activeGalleryAlbum, true);
+    });
+}
+const galleryBackButton = $("galleryBackButton");
+if (galleryBackButton) {
+    galleryBackButton.addEventListener("click", event => {
+        event.preventDefault();
+        closeGalleryAlbum();
+    });
+}
 }
 /* =========================================================
-OPEN GALLERY MODAL
+OPEN GALLERY ADMIN MODAL
 ========================================================= */
-function openGalleryAdminModal(
-galleryItem = null
-) {
+function openGalleryAdminModal() {
 const modal =
 $("galleryAdminModal");
 const form =
 $("galleryAdminForm");
-const title =
-$("galleryAdminModalTitle");
-const message =
-$("galleryAdminMessage");
+const titleInput =
+$("adminGalleryAlbumTitle");
 const imageInput =
 $("adminGalleryImage");
-const captionInput =
-$("adminGalleryCaption");
 const orderInput =
 $("adminGalleryOrder");
 const publishedInput =
 $("adminGalleryPublished");
+const message =
+$("galleryAdminMessage");
 if (!modal) {
 return;
 }
-editingGalleryId =
-galleryItem?.id || null;
 if (form) {
 form.reset();
 }
+if (titleInput) {
+titleInput.value = "";
+}
+if (imageInput) {
+imageInput.value = "";
+}
+if (orderInput) {
+orderInput.value = "0";
+}
+if (publishedInput) {
+publishedInput.checked = true;
+}
 if (message) {
-message.textContent =
-"";
-message.className =
-"admin-form-message";
+message.textContent = "";
+message.className = "admin-form-message";
 }
-if (galleryItem) {
-if (title) {
-title.textContent =
-"EDIT GALLERY ITEM";
-}
-if (captionInput) {
-captionInput.value =
-galleryItem.caption ||
-"";
-}
-if (orderInput) {
-orderInput.value =
-galleryItem.display_order ??
-0;
-}
-if (publishedInput) {
-publishedInput.checked =
-galleryItem.published !== false;
-}
-if (imageInput) {
-imageInput.removeAttribute(
-"multiple"
-);
-}
-} else {
-if (title) {
-title.textContent =
-"ADD GALLERY IMAGES";
-}
-if (orderInput) {
-orderInput.value =
-"0";
-}
-if (publishedInput) {
-publishedInput.checked =
-true;
-}
-if (imageInput) {
-imageInput.setAttribute(
-"multiple",
-""
-);
-}
-}
-modal.classList.add(
-"active"
-);
-body.classList.add(
-"modal-open"
-);
+modal.classList.add("active");
+body.classList.add("modal-open");
 }
 /* =========================================================
-CLOSE GALLERY MODAL
+CLOSE GALLERY ADMIN MODAL
 ========================================================= */
 function closeGalleryAdminModal() {
 const modal =
 $("galleryAdminModal");
 if (modal) {
-modal.classList.remove(
-"active"
-);
+modal.classList.remove("active");
 }
-body.classList.remove(
-"modal-open"
-);
-editingGalleryId =
-null;
-const imageInput =
-$("adminGalleryImage");
-if (imageInput) {
-imageInput.setAttribute(
-"multiple",
-""
-);
-}
+body.classList.remove("modal-open");
 }
 /* =========================================================
-SAVE GALLERY ITEMS
+CREATE GALLERY ALBUM ID
 ========================================================= */
-async function saveGalleryItems() {
+function createGalleryAlbumId() {
+if (
+window.crypto &&
+typeof window.crypto.randomUUID === "function"
+) {
+return window.crypto.randomUUID();
+}
+return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+/[xy]/g,
+character => {
+const random = Math.random() * 16 | 0;
+const value =
+character === "x"
+? random
+: (random & 0x3 | 0x8);
+return value.toString(16);
+}
+);
+}
+/* =========================================================
+SAVE GALLERY ALBUM
+========================================================= */
+async function saveGalleryAlbum() {
 const message =
 $("galleryAdminMessage");
 const saveButton =
 $("saveGalleryButton");
+const titleInput =
+$("adminGalleryAlbumTitle");
 const imageInput =
 $("adminGalleryImage");
-if (
-!supabaseClient ||
-!currentUser ||
-!isAdmin
-) {
+const orderInput =
+$("adminGalleryOrder");
+const publishedInput =
+$("adminGalleryPublished");
+if (!supabaseClient || !currentUser || !isAdmin) {
 showAdminMessage(
 message,
 "ADMIN ACCESS REQUIRED.",
@@ -3397,113 +3435,75 @@ message,
 );
 return;
 }
-if (
-!imageInput ||
-!imageInput.files ||
-imageInput.files.length === 0
-) {
+const albumTitle =
+titleInput?.value?.trim() || "";
+const files = imageInput?.files
+? Array.from(imageInput.files)
+: [];
+const displayOrder =
+parseInt(orderInput?.value, 10) || 0;
+const published =
+publishedInput?.checked !== false;
+if (!albumTitle) {
 showAdminMessage(
 message,
-"PLEASE SELECT AT LEAST ONE IMAGE.",
+"ALBUM NAME IS REQUIRED.",
 "error"
 );
 return;
 }
-const files =
-Array.from(
-imageInput.files
+if (files.length === 0) {
+showAdminMessage(
+message,
+"PLEASE SELECT AT LEAST ONE PHOTO.",
+"error"
 );
-const caption =
-$("adminGalleryCaption")
-?.value
-?.trim() ||
-"";
-const startingOrder =
-parseInt(
-$("adminGalleryOrder")
-?.value,
-10
-) || 0;
-const published =
-$("adminGalleryPublished")
-?.checked !== false;
+return;
+}
 try {
 if (saveButton) {
-saveButton.disabled =
-true;
+saveButton.disabled = true;
 saveButton.textContent =
 `UPLOADING 0/${files.length}...`;
 }
-if (editingGalleryId) {
-await updateExistingGalleryItem(
-files[0],
-caption,
-startingOrder,
-published,
-editingGalleryId,
-message,
-saveButton
-);
-} else {
-for (
-let index = 0;
-index < files.length;
-index++
-) {
+const albumId = createGalleryAlbumId();
+const payloads = [];
+for (let index = 0; index < files.length; index++) {
 if (saveButton) {
 saveButton.textContent =
-`UPLOADING ${
-index + 1
-}/${files.length}...`;
+`UPLOADING ${index + 1}/${files.length}...`;
 }
 showAdminMessage(
 message,
-`UPLOADING ${
-index + 1
-}/${files.length}...`,
+`UPLOADING ${index + 1}/${files.length}...`,
 "info"
 );
 const imageData =
-await readFileAsDataURL(
-files[index]
-);
-const payload = {
-image_url:
-imageData,
-caption:
-caption ||
-null,
-display_order:
-startingOrder +
-index,
+await readFileAsDataURL(files[index]);
+payloads.push({
+image_url: imageData,
+caption: albumTitle,
+album_id: albumId,
+album_title: albumTitle,
+is_cover: index === 0,
+display_order: displayOrder + index,
 published,
-created_at:
-new Date().toISOString(),
-updated_at:
-new Date().toISOString()
-};
-const {
-error
-} =
+created_at: new Date().toISOString(),
+updated_at: new Date().toISOString()
+});
+}
+const { error } =
 await supabaseClient
 .from("gallery")
-.insert(
-payload
-);
+.insert(payloads);
 if (error) {
 throw error;
 }
-}
 showAdminMessage(
 message,
-`${files.length} IMAGE${
-files.length === 1
-? ""
-: "S"
-} UPLOADED SUCCESSFULLY.`,
+`${files.length} PHOTO${files.length === 1 ? "" : "S"} ADDED TO “${albumTitle}”.`,
 "success"
 );
-}
 await loadAdminGallery();
 await updateGalleryCount();
 await loadPublicGallery();
@@ -3511,86 +3511,90 @@ setTimeout(
 () => {
 closeGalleryAdminModal();
 },
-800
+900
 );
 } catch (error) {
 console.error(
-"Save gallery error:",
+"Save gallery album error:",
 error
 );
 showAdminMessage(
 message,
 error.message ||
-"UNABLE TO SAVE GALLERY.",
+"UNABLE TO CREATE GALLERY ALBUM.",
 "error"
 );
 } finally {
 if (saveButton) {
-saveButton.disabled =
-false;
-saveButton.textContent =
-editingGalleryId
-? "SAVE GALLERY"
-: "UPLOAD IMAGES";
+saveButton.disabled = false;
+saveButton.textContent = "CREATE ALBUM";
 }
 }
 }
 /* =========================================================
-UPDATE EXISTING GALLERY ITEM
+GROUP GALLERY ROWS INTO ALBUMS
 ========================================================= */
-async function updateExistingGalleryItem(
-file,
-caption,
-displayOrder,
-published,
-galleryId,
-message,
-saveButton
+function groupGalleryAlbums(items) {
+const groups = new Map();
+(items || []).forEach(item => {
+let key = "";
+if (item.album_id) {
+key = `album:${item.album_id}`;
+} else if (item.album_title) {
+key = `title:${String(item.album_title).trim().toLowerCase()}`;
+} else if (item.caption) {
+key = `caption:${String(item.caption).trim().toLowerCase()}`;
+} else {
+key = `single:${item.id}`;
+}
+if (!groups.has(key)) {
+groups.set(key, {
+id: item.album_id || key,
+title:
+item.album_title ||
+item.caption ||
+"SYNTHENOVA ARCHIVE",
+images: [],
+order: Number(item.display_order) || 0,
+created_at: item.created_at || ""
+});
+}
+const album = groups.get(key);
+album.images.push(item);
+album.order = Math.min(
+album.order,
+Number(item.display_order) || 0
+);
+if (
+item.created_at &&
+(!album.created_at || item.created_at < album.created_at)
 ) {
-let imageData = null;
-if (file) {
-imageData =
-await readFileAsDataURL(
-file
+album.created_at = item.created_at;
+}
+});
+return Array.from(groups.values())
+.map(album => {
+album.images.sort((a, b) => {
+if (a.is_cover && !b.is_cover) return -1;
+if (!a.is_cover && b.is_cover) return 1;
+return (Number(a.display_order) || 0) -
+(Number(b.display_order) || 0);
+});
+album.cover =
+album.images.find(item => item.is_cover) ||
+album.images[0] || null;
+album.title =
+album.title || "SYNTHENOVA ARCHIVE";
+return album;
+})
+.sort((a, b) => {
+if (a.order !== b.order) {
+return a.order - b.order;
+}
+return String(a.created_at).localeCompare(
+String(b.created_at)
 );
-}
-const payload = {
-caption:
-caption || null,
-display_order:
-displayOrder,
-published,
-updated_at:
-new Date().toISOString()
-};
-if (imageData) {
-payload.image_url =
-imageData;
-}
-if (saveButton) {
-saveButton.textContent =
-"SAVING...";
-}
-const {
-error
-} =
-await supabaseClient
-.from("gallery")
-.update(
-payload
-)
-.eq(
-"id",
-galleryId
-);
-if (error) {
-throw error;
-}
-showAdminMessage(
-message,
-"GALLERY ITEM UPDATED.",
-"success"
-);
+});
 }
 /* =========================================================
 LOAD ADMIN GALLERY
@@ -3601,10 +3605,7 @@ $("adminGalleryList");
 if (!list) {
 return;
 }
-if (
-!supabaseClient ||
-!isAdmin
-) {
+if (!supabaseClient || !isAdmin) {
 list.innerHTML = `
 <div class="admin-empty-state">
 ADMIN ACCESS REQUIRED.
@@ -3614,61 +3615,45 @@ return;
 }
 list.innerHTML = `
 <div class="admin-loading">
-LOADING GALLERY...
+LOADING GALLERY ALBUMS...
 </div>
 `;
 try {
-const {
-data,
-error
-} =
+const { data, error } =
 await supabaseClient
 .from("gallery")
 .select(`
 id,
 image_url,
 caption,
+album_id,
+album_title,
+is_cover,
 display_order,
 published,
 created_at,
 updated_at
 `)
-.order(
-"display_order",
-{
-ascending: true
-}
-)
-.order(
-"created_at",
-{
-ascending: true
-}
-);
+.order("display_order", { ascending: true })
+.order("created_at", { ascending: true });
 if (error) {
 throw error;
 }
-if (
-!data ||
-data.length === 0
-) {
+if (!data || data.length === 0) {
 list.innerHTML = `
 <div class="admin-empty-state">
-NO GALLERY IMAGES YET.
+NO GALLERY ALBUMS YET.
 </div>
 `;
 return;
 }
+const albums = groupGalleryAlbums(data);
 list.innerHTML = "";
-data.forEach(
-galleryItem => {
+albums.forEach(album => {
 list.appendChild(
-createAdminGalleryCard(
-galleryItem
-)
+createAdminGalleryAlbumCard(album)
 );
-}
-);
+});
 } catch (error) {
 console.error(
 "Load admin gallery error:",
@@ -3676,118 +3661,82 @@ error
 );
 list.innerHTML = `
 <div class="admin-empty-state error">
-UNABLE TO LOAD GALLERY.
+UNABLE TO LOAD GALLERY ALBUMS.
 </div>
 `;
 }
 }
 /* =========================================================
-ADMIN GALLERY CARD
+CREATE ADMIN GALLERY ALBUM CARD
 ========================================================= */
-function createAdminGalleryCard(
-galleryItem
-) {
+function createAdminGalleryAlbumCard(album) {
 const card =
-document.createElement(
-"article"
-);
-card.className =
-"admin-gallery-card";
-const image =
-galleryItem.image_url
+document.createElement("article");
+card.className = "admin-gallery-album-card";
+const cover = album.cover?.image_url
 ? `
 <img
-src="${escapeHTML(
-galleryItem.image_url
-)}"
-alt="${escapeHTML(
-galleryItem.caption ||
-"SYNTHENOVA gallery image"
-)}"
+src="${escapeHTML(album.cover.image_url)}"
+alt="${escapeHTML(album.title)}"
 loading="lazy"
 >
 `
 : `
-<div class="admin-card-placeholder">
-IMAGE
-</div>
+<div class="admin-card-placeholder">ALBUM</div>
 `;
+const published = album.images.some(
+item => item.published !== false
+);
 card.innerHTML = `
-<div class="admin-gallery-image">
-${image}
+<div class="admin-gallery-album-cover">
+${cover}
+<span class="admin-gallery-photo-count">
+${album.images.length} PHOTO${album.images.length === 1 ? "" : "S"}
+</span>
 </div>
-<div class="admin-gallery-info">
+<div class="admin-gallery-album-info">
 <div class="admin-data-card-top">
-<span class="admin-data-status ${
-galleryItem.published
-? "active"
-: "inactive"
-}">
-${
-galleryItem.published
-? "PUBLISHED"
-: "HIDDEN"
-}
+<span class="admin-data-status ${published ? "active" : "inactive"}">
+${published ? "PUBLISHED" : "HIDDEN"}
 </span>
 <span class="admin-data-order">
-#${escapeHTML(
-galleryItem.display_order ?? 0
-)}
+#${escapeHTML(album.order)}
 </span>
 </div>
-${
-galleryItem.caption
-? `
-<p class="admin-gallery-caption">
-${escapeHTML(
-galleryItem.caption
-)}
-</p>
-`
-: `
-<p class="admin-gallery-caption muted">
-NO CAPTION
-</p>
-`
-}
-</div>
+<h3>${escapeHTML(album.title)}</h3>
+<p>${album.images.length} photo${album.images.length === 1 ? "" : "s"} in this album.</p>
 <div class="admin-gallery-actions">
 <button
-type="button"
 class="admin-edit-button"
-data-gallery-edit="${escapeHTML(
-galleryItem.id
-)}"
+type="button"
+data-gallery-view="${escapeHTML(album.id)}"
 >
-EDIT
+VIEW
 </button>
 <button
-type="button"
 class="admin-delete-button"
-data-gallery-delete="${escapeHTML(
-galleryItem.id
-)}"
+type="button"
+data-gallery-delete-album="${escapeHTML(album.id)}"
 >
-DELETE
+DELETE ALBUM
 </button>
 </div>
+</div>
 `;
-const editButton =
-card.querySelector(
-"[data-gallery-edit]"
-);
+const viewButton =
+card.querySelector("[data-gallery-view]");
 const deleteButton =
-card.querySelector(
-"[data-gallery-delete]"
-);
-if (editButton) {
-editButton.addEventListener(
+card.querySelector("[data-gallery-delete-album]");
+if (viewButton) {
+viewButton.addEventListener(
 "click",
 event => {
 event.preventDefault();
-openGalleryAdminEdit(
-galleryItem
-);
+closeGalleryAlbum();
+closeDashboard();
+setTimeout(() => {
+openGalleryAlbum(album, { scroll: true });
+}, 80);
 }
 );
 }
@@ -3796,64 +3745,37 @@ deleteButton.addEventListener(
 "click",
 event => {
 event.preventDefault();
-deleteGalleryItem(
-galleryItem
-);
+deleteGalleryAlbum(album);
 }
 );
 }
 return card;
 }
 /* =========================================================
-EDIT GALLERY ITEM
+DELETE GALLERY ALBUM
 ========================================================= */
-function openGalleryAdminEdit(
-galleryItem
-) {
-if (!galleryItem) {
+async function deleteGalleryAlbum(album) {
+if (!album?.images?.length) {
 return;
 }
-openGalleryAdminModal(
-galleryItem
-);
-}
-/* =========================================================
-DELETE GALLERY ITEM
-========================================================= */
-async function deleteGalleryItem(
-galleryItem
-) {
-if (!galleryItem?.id) {
-return;
-}
-if (
-!supabaseClient ||
-!currentUser ||
-!isAdmin
-) {
-alert(
-"ADMIN ACCESS REQUIRED."
-);
+if (!supabaseClient || !currentUser || !isAdmin) {
+alert("ADMIN ACCESS REQUIRED.");
 return;
 }
 const confirmed =
 window.confirm(
-"DELETE THIS GALLERY IMAGE?"
+`DELETE ALBUM “${album.title}” AND ALL ${album.images.length} PHOTO${album.images.length === 1 ? "" : "S"}?`
 );
 if (!confirmed) {
 return;
 }
 try {
-const {
-error
-} =
+const ids = album.images.map(item => item.id);
+const { error } =
 await supabaseClient
 .from("gallery")
 .delete()
-.eq(
-"id",
-galleryItem.id
-);
+.in("id", ids);
 if (error) {
 throw error;
 }
@@ -3862,12 +3784,12 @@ await updateGalleryCount();
 await loadPublicGallery();
 } catch (error) {
 console.error(
-"Delete gallery item error:",
+"Delete gallery album error:",
 error
 );
 alert(
 error.message ||
-"UNABLE TO DELETE GALLERY IMAGE."
+"UNABLE TO DELETE GALLERY ALBUM."
 );
 }
 }
@@ -3876,6 +3798,7 @@ LOAD PUBLIC GALLERY
 ========================================================= */
 async function loadPublicGallery() {
 const galleryGrid =
+$("galleryContainer") ||
 $("publicGalleryGrid") ||
 $("galleryGrid") ||
 $("publicGallery");
@@ -3892,40 +3815,31 @@ return;
 }
 galleryGrid.innerHTML = `
 <div class="gallery-loading">
-LOADING GALLERY...
+LOADING ALBUMS...
 </div>
 `;
 try {
-const {
-data,
-error
-} =
+const { data, error } =
 await supabaseClient
 .from("gallery")
 .select(`
 id,
 image_url,
 caption,
+album_id,
+album_title,
+is_cover,
 display_order,
-published
+published,
+created_at
 `)
-.eq(
-"published",
-true
-)
-.order(
-"display_order",
-{
-ascending: true
-}
-);
+.eq("published", true)
+.order("display_order", { ascending: true })
+.order("created_at", { ascending: true });
 if (error) {
 throw error;
 }
-if (
-!data ||
-data.length === 0
-) {
+if (!data || data.length === 0) {
 galleryGrid.innerHTML = `
 <div class="gallery-loading">
 GALLERY WILL BE UPDATED SOON.
@@ -3933,17 +3847,14 @@ GALLERY WILL BE UPDATED SOON.
 `;
 return;
 }
+const albums = groupGalleryAlbums(data);
+currentGalleryAlbums = albums;
 galleryGrid.innerHTML = "";
-data.forEach(
-galleryItem => {
+albums.forEach(album => {
 galleryGrid.appendChild(
-createPublicGalleryItem(
-galleryItem
-)
+createPublicGalleryAlbum(album)
 );
-}
-);
-setupGalleryLightbox();
+});
 } catch (error) {
 console.error(
 "Public gallery error:",
@@ -3957,151 +3868,176 @@ UNABLE TO LOAD GALLERY.
 }
 }
 /* =========================================================
-CREATE PUBLIC GALLERY ITEM
+CREATE PUBLIC GALLERY ALBUM
 ========================================================= */
-function createPublicGalleryItem(
-galleryItem
-) {
-const item =
-document.createElement(
-"article"
-);
-item.className =
-"gallery-item";
-item.dataset.galleryId =
-galleryItem.id || "";
-const image =
-galleryItem.image_url
+function createPublicGalleryAlbum(album) {
+const card =
+document.createElement("article");
+card.className = "gallery-album-card";
+card.dataset.albumId = album.id || "";
+const cover = album.cover?.image_url
 ? `
 <img
-src="${escapeHTML(
-galleryItem.image_url
-)}"
-alt="${escapeHTML(
-galleryItem.caption ||
-"SYNTHENOVA gallery"
-)}"
+src="${escapeHTML(album.cover.image_url)}"
+alt="${escapeHTML(album.title)}"
 loading="lazy"
 >
 `
 : `
-<div class="gallery-placeholder">
-SYNTHENOVA
+<div class="gallery-album-placeholder">SYNTHENOVA</div>
+`;
+card.innerHTML = `
+<div class="gallery-album-cover">
+${cover}
+<div class="gallery-album-overlay">
+<span>OPEN ALBUM</span>
+</div>
+</div>
+<div class="gallery-album-info">
+<div>
+<span>ALBUM</span>
+<h3>${escapeHTML(album.title)}</h3>
+</div>
+<strong>${album.images.length} PHOTO${album.images.length === 1 ? "" : "S"}</strong>
 </div>
 `;
-item.innerHTML = `
-<div class="gallery-image-wrap">
-${image}
-<div class="gallery-hover">
-<span>
-VIEW
-</span>
-</div>
-</div>
-${
-galleryItem.caption
-? `
-<div class="gallery-caption">
-${escapeHTML(
-galleryItem.caption
-)}
-</div>
-`
-: ""
-}
-`;
-item.addEventListener(
+card.addEventListener(
 "click",
 event => {
 event.preventDefault();
-openGalleryLightbox(
-galleryItem
-);
+openGalleryAlbum(album);
 }
 );
-return item;
+return card;
 }
 /* =========================================================
-GALLERY LIGHTBOX
+OPEN GALLERY ALBUM
 ========================================================= */
+let activeGalleryAlbum = null;
 let currentGalleryItems = [];
 let currentGalleryIndex = 0;
-function setupGalleryLightbox() {
-const galleryItems =
-document.querySelectorAll(
-".gallery-item"
-);
-currentGalleryItems =
-Array.from(
-galleryItems
-).map(
-item => {
-const image =
-item.querySelector(
-"img"
-);
-return {
-src:
-image?.src ||
-"",
-alt:
-image?.alt ||
-"SYNTHENOVA gallery",
-caption:
-item.querySelector(
-".gallery-caption"
-)?.textContent
-?.trim() ||
-""
-};
+let currentGalleryAlbums = [];
+let galleryShowingAll = false;
+
+function getGalleryMediaType(item) {
+    const explicit = String(item?.media_type || item?.type || "").toLowerCase();
+    if (explicit.includes("video")) return "video";
+    const url = String(item?.image_url || item?.media_url || "").toLowerCase();
+    if (url.startsWith("data:video/") || /\.(mp4|webm|ogg|mov)(\?|#|$)/i.test(url)) return "video";
+    return "image";
 }
-);
+
+function getGalleryMediaUrl(item) {
+    return item?.media_url || item?.image_url || item?.url || "";
 }
+
+function galleryMediaCounts(items) {
+    const photos = items.filter(item => getGalleryMediaType(item) === "image").length;
+    const videos = items.length - photos;
+    return { photos, videos };
+}
+
+function renderGalleryInlineMedia(item, index, album, preview = false) {
+    const url = getGalleryMediaUrl(item);
+    const type = getGalleryMediaType(item);
+    const caption = item.caption || album.title || "SYNTHENOVA gallery";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `gallery-inline-media ${type === "video" ? "is-video" : "is-photo"}`;
+    button.dataset.index = String(index);
+    if (type === "video") {
+        button.innerHTML = url
+            ? `<video src="${escapeHTML(url)}" muted playsinline preload="metadata"></video><span class="gallery-media-badge">VIDEO</span><span class="gallery-media-number">${index + 1}</span>`
+            : `<span class="gallery-media-missing">VIDEO UNAVAILABLE</span>`;
+    } else {
+        button.innerHTML = url
+            ? `<img src="${escapeHTML(url)}" alt="${escapeHTML(caption)}" loading="lazy"><span class="gallery-media-number">${index + 1}</span>`
+            : `<span class="gallery-media-missing">PHOTO UNAVAILABLE</span>`;
+    }
+    button.addEventListener("click", event => {
+        event.preventDefault();
+        openGalleryLightbox(album.images, index);
+    });
+    return button;
+}
+
+function renderGalleryInlineAlbum(album, showAll = false) {
+    const detail = $("galleryAlbumInline");
+    const title = $("galleryInlineTitle");
+    const meta = $("galleryInlineMeta");
+    const grid = $("galleryInlinePreview");
+    const seeAll = $("gallerySeeAllButton");
+    const back = $("galleryBackButton");
+    if (!detail || !grid) return;
+
+    const items = album?.images || [];
+    const counts = galleryMediaCounts(items);
+    if (title) title.textContent = album?.title || "ALBUM";
+    if (meta) meta.textContent = `${items.length} MEDIA • ${counts.photos} PHOTOS • ${counts.videos} VIDEOS`;
+
+    grid.innerHTML = "";
+    const visibleItems = showAll ? items : items.slice(0, Math.min(6, items.length));
+    visibleItems.forEach((item, index) => {
+        grid.appendChild(renderGalleryInlineMedia(item, index, album, !showAll));
+    });
+
+    if (seeAll) {
+        seeAll.hidden = showAll || items.length <= visibleItems.length;
+        seeAll.textContent = `SEE ALL ${items.length} MEDIA`;
+    }
+    if (back) back.hidden = false;
+    detail.hidden = false;
+    detail.classList.add("active");
+    galleryShowingAll = showAll;
+}
+
+function openGalleryAlbum(album, options = {}) {
+    if (!album) return;
+    activeGalleryAlbum = album;
+    galleryShowingAll = false;
+    renderGalleryInlineAlbum(album, false);
+
+    const container = $("galleryContainer");
+    const detail = $("galleryAlbumInline");
+    if (container) container.classList.add("gallery-albums-hidden");
+    if (detail && (options.scroll !== false)) {
+        setTimeout(() => {
+            detail.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 20);
+    }
+}
+
+function closeGalleryAlbum() {
+    const detail = $("galleryAlbumInline");
+    const container = $("galleryContainer");
+    if (detail) {
+        detail.classList.remove("active");
+        detail.hidden = true;
+    }
+    if (container) container.classList.remove("gallery-albums-hidden");
+    activeGalleryAlbum = null;
+    galleryShowingAll = false;
+    body.classList.remove("modal-open");
+}
+
 /* =========================================================
 OPEN GALLERY LIGHTBOX
 ========================================================= */
-function openGalleryLightbox(
-galleryItem
-) {
+function openGalleryLightbox(items, index = 0) {
 const lightbox =
 $("galleryLightbox");
-if (!lightbox) {
+if (!lightbox || !items?.length) {
 return;
 }
-const image =
-$("galleryLightboxImage");
-const caption =
-$("galleryLightboxCaption");
-currentGalleryIndex =
-currentGalleryItems.findIndex(
-item =>
-item.src ===
-galleryItem.image_url
+currentGalleryItems = items;
+currentGalleryIndex = Math.max(
+0,
+Math.min(index, items.length - 1)
 );
-if (
-currentGalleryIndex < 0
-) {
-currentGalleryIndex = 0;
-}
-if (image) {
-image.src =
-galleryItem.image_url ||
-"";
-image.alt =
-galleryItem.caption ||
-"SYNTHENOVA gallery";
-}
-if (caption) {
-caption.textContent =
-galleryItem.caption ||
-"";
-}
-lightbox.classList.add(
-"active"
-);
-body.classList.add(
-"modal-open"
-);
+updateGalleryLightbox();
+lightbox.classList.add("active");
+lightbox.setAttribute("aria-hidden", "false");
+body.classList.add("modal-open");
 }
 /* =========================================================
 CLOSE GALLERY LIGHTBOX
@@ -4110,82 +4046,29 @@ function closeGalleryLightbox() {
 const lightbox =
 $("galleryLightbox");
 if (lightbox) {
-lightbox.classList.remove(
-"active"
-);
+lightbox.classList.remove("active");
+lightbox.setAttribute("aria-hidden", "true");
 }
-body.classList.remove(
-"modal-open"
-);
-}
-/* =========================================================
-GALLERY LIGHTBOX CONTROLS
-========================================================= */
-const galleryLightbox =
-$("galleryLightbox");
-const galleryLightboxClose =
-$("galleryLightboxClose");
-const galleryLightboxPrev =
-$("galleryLightboxPrev");
-const galleryLightboxNext =
-$("galleryLightboxNext");
-if (galleryLightboxClose) {
-galleryLightboxClose.addEventListener(
-"click",
-event => {
-event.preventDefault();
-closeGalleryLightbox();
-}
-);
-}
-if (galleryLightbox) {
-galleryLightbox.addEventListener(
-"click",
-event => {
 if (
-event.target ===
-galleryLightbox
+activeGalleryAlbum &&
+$("galleryAlbumModal")?.classList.contains("active")
 ) {
-closeGalleryLightbox();
+body.classList.add("modal-open");
+return;
 }
-}
-);
-}
-if (galleryLightboxPrev) {
-galleryLightboxPrev.addEventListener(
-"click",
-event => {
-event.preventDefault();
-showPreviousGalleryImage();
-}
-);
-}
-if (galleryLightboxNext) {
-galleryLightboxNext.addEventListener(
-"click",
-event => {
-event.preventDefault();
-showNextGalleryImage();
-}
-);
+body.classList.remove("modal-open");
 }
 /* =========================================================
 SHOW PREVIOUS GALLERY IMAGE
 ========================================================= */
 function showPreviousGalleryImage() {
-if (
-currentGalleryItems.length ===
-0
-) {
+if (!currentGalleryItems.length) {
 return;
 }
 currentGalleryIndex--;
-if (
-currentGalleryIndex < 0
-) {
+if (currentGalleryIndex < 0) {
 currentGalleryIndex =
-currentGalleryItems.length -
-1;
+currentGalleryItems.length - 1;
 }
 updateGalleryLightbox();
 }
@@ -4193,10 +4076,7 @@ updateGalleryLightbox();
 SHOW NEXT GALLERY IMAGE
 ========================================================= */
 function showNextGalleryImage() {
-if (
-currentGalleryItems.length ===
-0
-) {
+if (!currentGalleryItems.length) {
 return;
 }
 currentGalleryIndex++;
@@ -4204,8 +4084,7 @@ if (
 currentGalleryIndex >=
 currentGalleryItems.length
 ) {
-currentGalleryIndex =
-0;
+currentGalleryIndex = 0;
 }
 updateGalleryLightbox();
 }
@@ -4213,28 +4092,46 @@ updateGalleryLightbox();
 UPDATE GALLERY LIGHTBOX
 ========================================================= */
 function updateGalleryLightbox() {
-const item =
-currentGalleryItems[
-currentGalleryIndex
-];
-if (!item) {
-return;
+    const item = currentGalleryItems[currentGalleryIndex];
+    if (!item) return;
+    const image = $("galleryLightboxImage");
+    const caption = $("galleryLightboxCaption");
+    const counter = $("galleryLightboxCounter");
+    const content = document.querySelector(".gallery-lightbox-content");
+    const url = getGalleryMediaUrl(item);
+    const type = getGalleryMediaType(item);
+
+    if (content) {
+        let video = content.querySelector("#galleryLightboxVideo");
+        if (!video) {
+            video = document.createElement("video");
+            video.id = "galleryLightboxVideo";
+            video.controls = true;
+            video.playsInline = true;
+            video.className = "gallery-lightbox-video";
+            content.insertBefore(video, caption || counter || null);
+        }
+        if (type === "video") {
+            if (image) image.style.display = "none";
+            video.style.display = "block";
+            video.src = url;
+            video.load();
+        } else {
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+            video.style.display = "none";
+            if (image) {
+                image.style.display = "block";
+                image.src = url;
+                image.alt = item.caption || activeGalleryAlbum?.title || "SYNTHENOVA gallery";
+            }
+        }
+    }
+    if (caption) caption.textContent = item.caption || activeGalleryAlbum?.title || "";
+    if (counter) counter.textContent = `${currentGalleryIndex + 1} / ${currentGalleryItems.length}`;
 }
-const image =
-$("galleryLightboxImage");
-const caption =
-$("galleryLightboxCaption");
-if (image) {
-image.src =
-item.src;
-image.alt =
-item.alt;
-}
-if (caption) {
-caption.textContent =
-item.caption;
-}
-}
+
 /* =========================================================
 KEYBOARD GALLERY CONTROLS
 ========================================================= */
@@ -4243,40 +4140,45 @@ document.addEventListener(
 event => {
 const lightbox =
 $("galleryLightbox");
+const albumModal =
+$("galleryAlbumModal");
 if (
-!lightbox ||
-!lightbox.classList.contains(
-"active"
-)
+lightbox?.classList.contains("active")
 ) {
+if (event.key === "Escape") {
+event.preventDefault();
+closeGalleryLightbox();
+return;
+}
+if (event.key === "ArrowLeft") {
+event.preventDefault();
+showPreviousGalleryImage();
+return;
+}
+if (event.key === "ArrowRight") {
+event.preventDefault();
+showNextGalleryImage();
+return;
+}
 return;
 }
 if (
-event.key ===
-"Escape"
+albumModal?.classList.contains("active") &&
+event.key === "Escape"
 ) {
-closeGalleryLightbox();
+event.preventDefault();
+closeGalleryAlbum();
 }
-if (
-event.key ===
-"ArrowLeft"
-) {
-showPreviousGalleryImage();
-}
-if (
-event.key ===
-"ArrowRight"
-) {
-showNextGalleryImage();
-}
-}
-);
+});
 /* =========================================================
 ADMIN MODAL ESCAPE CONTROL
 ========================================================= */
 document.addEventListener(
 "keydown",
 event => {
+if (event.defaultPrevented) {
+return;
+}
 if (
 event.key !==
 "Escape"
@@ -5164,6 +5066,9 @@ GLOBAL ESCAPE HANDLER
 document.addEventListener(
 "keydown",
 event => {
+if (event.defaultPrevented) {
+return;
+}
 if (
 event.key !==
 "Escape"
