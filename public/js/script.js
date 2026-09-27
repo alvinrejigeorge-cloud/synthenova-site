@@ -322,8 +322,44 @@ behavior: "smooth"
 }
 }
 /* =========================================================
+PERFORMANCE-FRIENDLY SCROLL SCHEDULER
+========================================================= */
+let synthenovaScrollFrame = 0;
+let synthenovaScrollY = 0;
+const synthenovaScrollSubscribers = new Set();
+
+function subscribeToScroll(callback) {
+    if (typeof callback !== "function") return;
+    synthenovaScrollSubscribers.add(callback);
+}
+
+function requestSynthenovaScrollUpdate() {
+    synthenovaScrollY = window.scrollY || window.pageYOffset || 0;
+
+    if (synthenovaScrollFrame) return;
+
+    synthenovaScrollFrame = requestAnimationFrame(() => {
+        synthenovaScrollFrame = 0;
+        const y = synthenovaScrollY;
+
+        synthenovaScrollSubscribers.forEach(callback => {
+            try {
+                callback(y);
+            } catch (error) {
+                console.warn("SYNTHENOVA scroll callback error:", error);
+            }
+        });
+    });
+}
+
+window.addEventListener("scroll", requestSynthenovaScrollUpdate, {
+    passive: true
+});
+
+/* =========================================================
 PUBLIC INTERACTIONS
 ========================================================= */
+
 function setupPublicInteractions() {
 const yearElements =
 document.querySelectorAll(
@@ -338,23 +374,10 @@ new Date().getFullYear();
 const backToTop =
 $("backToTop");
 if (backToTop) {
-window.addEventListener(
-"scroll",
-() => {
-if (
-window.scrollY >
-500
-) {
-backToTop.classList.add(
-"visible"
-);
-} else {
-backToTop.classList.remove(
-"visible"
-);
-}
-}
-);
+subscribeToScroll(y => {
+const shouldShow = y > 500;
+backToTop.classList.toggle("visible", shouldShow);
+});
 backToTop.addEventListener(
 "click",
 () => {
@@ -3947,7 +3970,7 @@ function renderGalleryInlineMedia(item, index, album, preview = false) {
     button.dataset.index = String(index);
     if (type === "video") {
         button.innerHTML = url
-            ? `<video src="${escapeHTML(url)}" muted playsinline preload="metadata"></video><span class="gallery-media-badge">VIDEO</span><span class="gallery-media-number">${index + 1}</span>`
+            ? `<video src="${escapeHTML(url)}" muted playsinline preload="none"></video><span class="gallery-media-badge">VIDEO</span><span class="gallery-media-number">${index + 1}</span>`
             : `<span class="gallery-media-missing">VIDEO UNAVAILABLE</span>`;
     } else {
         button.innerHTML = url
@@ -4306,28 +4329,11 @@ document.querySelector(
 if (!header) {
 return;
 }
-const updateHeader =
-() => {
-if (
-window.scrollY > 40
-) {
-header.classList.add(
-"scrolled"
-);
-} else {
-header.classList.remove(
-"scrolled"
-);
-}
+const updateHeader = y => {
+header.classList.toggle("scrolled", y > 40);
 };
-updateHeader();
-window.addEventListener(
-"scroll",
-updateHeader,
-{
-passive: true
-}
-);
+updateHeader(window.scrollY || 0);
+subscribeToScroll(updateHeader);
 }
 /* =========================================================
 ACTIVE NAVIGATION
@@ -4729,6 +4735,35 @@ function setupRealtimeUpdates() {
 if (!supabaseClient) {
 return;
 }
+let refreshTimer = null;
+let refreshRunning = false;
+let refreshQueued = false;
+
+const scheduleRefresh = async (loader, adminLoader, countUpdater) => {
+    if (refreshRunning) {
+        refreshQueued = true;
+        return;
+    }
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(async () => {
+        refreshRunning = true;
+        try {
+            await loader();
+            if (isAdmin && adminLoader) {
+                await adminLoader();
+                if (countUpdater) await countUpdater();
+            }
+        } catch (error) {
+            console.warn("Realtime refresh error:", error);
+        } finally {
+            refreshRunning = false;
+            if (refreshQueued) {
+                refreshQueued = false;
+                scheduleRefresh(loader, adminLoader, countUpdater);
+            }
+        }
+    }, 250);
+};
 try {
 supabaseClient
 .channel(
@@ -4741,12 +4776,8 @@ event: "*",
 schema: "public",
 table: "team_members"
 },
-async () => {
-await loadPublicTeam();
-if (isAdmin) {
-await loadAdminTeam();
-await updateTeamCount();
-}
+() => {
+scheduleRefresh(loadPublicTeam, loadAdminTeam, updateTeamCount);
 }
 )
 .on(
@@ -4756,12 +4787,8 @@ event: "*",
 schema: "public",
 table: "events"
 },
-async () => {
-await loadPublicEvents();
-if (isAdmin) {
-await loadAdminEvents();
-await updateEventCount();
-}
+() => {
+scheduleRefresh(loadPublicEvents, loadAdminEvents, updateEventCount);
 }
 )
 .on(
@@ -4771,12 +4798,8 @@ event: "*",
 schema: "public",
 table: "gallery"
 },
-async () => {
-await loadPublicGallery();
-if (isAdmin) {
-await loadAdminGallery();
-await updateGalleryCount();
-}
+() => {
+scheduleRefresh(loadPublicGallery, loadAdminGallery, updateGalleryCount);
 }
 )
 .subscribe();
@@ -5105,12 +5128,18 @@ closeDashboard();
 /* =========================================================
 FINAL ADMIN SECURITY CHECK
 ========================================================= */
+let lastFocusAuthCheck = 0;
 window.addEventListener(
 "focus",
 async () => {
 if (!supabaseClient) {
 return;
 }
+const now = Date.now();
+if (now - lastFocusAuthCheck < 15000) {
+return;
+}
+lastFocusAuthCheck = now;
 try {
 const {
 data
@@ -5156,17 +5185,21 @@ error
 /* =========================================================
 PAGE VISIBILITY AUTH CHECK
 ========================================================= */
+let synthenovaHiddenAt = 0;
 document.addEventListener(
 "visibilitychange",
 async () => {
-if (
-document.visibilityState !==
-"visible"
-) {
-return;
+if (document.visibilityState !== "visible") {
+    synthenovaHiddenAt = Date.now();
+    return;
 }
 if (!supabaseClient) {
 return;
+}
+const hiddenFor = synthenovaHiddenAt ? Date.now() - synthenovaHiddenAt : 0;
+synthenovaHiddenAt = 0;
+if (hiddenFor < 15000) {
+    return;
 }
 try {
 const {
