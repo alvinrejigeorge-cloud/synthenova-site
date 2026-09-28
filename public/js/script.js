@@ -5831,3 +5831,251 @@ console.log(
     if (!viewer || !viewerImage) {
         return;
     }
+
+
+    /* =====================================================
+       OPEN VIEWER
+    ===================================================== */
+
+    function openEventPosterViewer(
+        poster
+    ) {
+
+        const image =
+            poster.querySelector("img");
+
+        if (!image) {
+            return;
+        }
+
+
+        /* Set image */
+
+        viewerImage.src =
+            image.currentSrc ||
+            image.src;
+
+        viewerImage.alt =
+            image.alt ||
+            "SYNTHENOVA event poster";
+
+
+        /* Get title from event card */
+
+        const card =
+            poster.closest(
+                ".event-card"
+            ) ||
+            poster.closest(
+                ".public-event-card"
+            );
+
+
+        const title =
+            card?.querySelector(
+                ".event-card-content h3"
+            );
+
+
+        if (viewerTitle) {
+
+            viewerTitle.textContent =
+                title?.textContent?.trim() ||
+                "SYNTHENOVA EVENT";
+
+        }
+
+
+        /* Show */
+
+        viewer.classList.add(
+            "active"
+        );
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE VIEWER
+    ===================================================== */
+
+    function closeEventPosterViewer() {
+
+        viewer.classList.remove(
+            "active"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+
+        window.setTimeout(
+            () => {
+
+                if (
+                    !viewer.classList.contains(
+                        "active"
+                    )
+                ) {
+
+                    viewerImage.src = "";
+
+                }
+
+            },
+            300
+        );
+
+    }
+
+
+    /* =====================================================
+       CLICK POSTER / VIEW
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const poster =
+                event.target.closest(
+                    ".event-poster"
+                );
+
+
+            if (!poster) {
+                return;
+            }
+
+
+            /*
+             * Don't open placeholder posters
+             */
+
+            const image =
+                poster.querySelector("img");
+
+
+            if (!image) {
+                return;
+            }
+
+
+            /*
+             * Open viewer
+             */
+
+            openEventPosterViewer(
+                poster
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CLOSE BUTTON
+    ===================================================== */
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                closeEventPosterViewer();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       CLICK OUTSIDE IMAGE
+    ===================================================== */
+
+    viewer.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === viewer
+            ) {
+
+                closeEventPosterViewer();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                viewer.classList.contains(
+                    "active"
+                )
+            ) {
+
+                closeEventPosterViewer();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       KEYBOARD ACCESS
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            const poster =
+                event.target.closest?.(
+                    ".event-poster"
+                );
+
+
+            if (!poster) {
+                return;
+            }
+
+
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+
+                event.preventDefault();
+
+                openEventPosterViewer(
+                    poster
+                );
+
+            }
+
+        }
+    );
+
+})();
