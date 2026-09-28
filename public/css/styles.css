@@ -7089,3 +7089,861 @@ a {
         -webkit-backdrop-filter: none;
     }
 }
+/* =========================================================
+   SYNTHENOVA EVENTS
+   HORIZONTAL EVENT CARD
+   POSTER LEFT / DETAILS RIGHT
+========================================================= */
+
+.events-layout {
+
+    width: 100%;
+
+    max-width: 1080px;
+
+    margin: 0 auto;
+
+    min-height: 0;
+
+}
+
+
+/* =========================================================
+   MAIN EVENT BOX
+========================================================= */
+
+.public-event-card.event-card-horizontal {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 360px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(250px, 0.72fr)
+        minmax(0, 1fr);
+
+    overflow: hidden;
+
+    border-radius: 24px;
+
+    background: #d6e5e1;
+
+    color: #075350;
+
+    border:
+        1px solid
+        rgba(7, 83, 80, 0.05);
+
+    box-shadow:
+        0 18px 42px
+        rgba(7, 83, 80, 0.08);
+
+}
+
+
+/* =========================================================
+   SUBTLE LIGHT EFFECT
+========================================================= */
+
+.public-event-card.event-card-horizontal::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            115deg,
+            rgba(255,255,255,0.20),
+            transparent 35%,
+            transparent 70%,
+            rgba(7,83,80,0.035)
+        );
+
+    z-index: 0;
+
+}
+
+
+/* =========================================================
+   POSTER
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster {
+
+    position: relative;
+
+    z-index: 1;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-height: 360px;
+
+    overflow: hidden;
+
+    background: #c7dad6;
+
+    cursor: pointer;
+
+    isolation: isolate;
+
+}
+
+
+/* =========================================================
+   POSTER IMAGE
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster img {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transform: scale(1);
+
+    transition:
+        transform 0.35s
+        cubic-bezier(.16,1,.3,1),
+
+        filter 0.35s ease;
+
+    will-change: transform;
+
+    user-select: none;
+
+}
+
+
+/* =========================================================
+   HOVER ZOOM
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster:hover img {
+
+    transform: scale(1.035);
+
+}
+
+
+/* =========================================================
+   VIEW LABEL
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster::after {
+
+    content: "VIEW";
+
+    position: absolute;
+
+    left: 18px;
+
+    bottom: 18px;
+
+    z-index: 3;
+
+    padding:
+        7px
+        10px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(7,83,80,0.82);
+
+    color: #edf4f2;
+
+    font-family:
+        "DM Mono",
+        monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.14em;
+
+    opacity: 0;
+
+    transform:
+        translateY(6px);
+
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease;
+
+}
+
+
+.public-event-card.event-card-horizontal
+.event-poster:hover::after,
+
+.public-event-card.event-card-horizontal
+.event-poster:focus-visible::after {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* =========================================================
+   POSTER CLICK ANIMATION
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster.poster-pressed
+img {
+
+    animation:
+        eventPosterPress
+        0.55s
+        cubic-bezier(.16,1,.3,1);
+
+}
+
+
+@keyframes eventPosterPress {
+
+    0% {
+
+        transform:
+            scale(1)
+            rotate(0deg);
+
+    }
+
+    30% {
+
+        transform:
+            scale(1.08)
+            rotate(-0.7deg);
+
+    }
+
+    55% {
+
+        transform:
+            scale(1.035)
+            rotate(0.35deg);
+
+    }
+
+    100% {
+
+        transform:
+            scale(1)
+            rotate(0deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENT DETAILS
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-card-content {
+
+    position: relative;
+
+    z-index: 1;
+
+    min-width: 0;
+
+    min-height: 360px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding:
+        34px
+        38px;
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-date {
+
+    display: inline-block;
+
+    margin-bottom: 10px;
+
+    font-family:
+        "DM Mono",
+        monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 0.12em;
+
+    opacity: 0.55;
+
+}
+
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-card-content h3 {
+
+    margin: 0;
+
+    font-size:
+        clamp(
+            30px,
+            4vw,
+            52px
+        );
+
+    line-height: 0.92;
+
+    letter-spacing: -0.055em;
+
+}
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-card-content p {
+
+    margin-top: 18px;
+
+    max-width: 520px;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    opacity: 0.68;
+
+}
+
+
+/* =========================================================
+   REGISTER BUTTON CONTAINER
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-card-action {
+
+    width:
+        min(
+            100%,
+            280px
+        );
+
+    margin-top: 26px;
+
+}
+
+
+/* =========================================================
+   REGISTER BUTTON
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-register-button {
+
+    width: 100%;
+
+    min-height: 46px;
+
+    margin-top: 0;
+
+    padding:
+        13px
+        18px;
+
+    border-radius: 11px;
+
+}
+
+
+/* =========================================================
+   REGISTER BUTTON HOVER
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-register-button:hover {
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 760px) {
+
+    .events-layout {
+
+        max-width: 560px;
+
+    }
+
+
+    .public-event-card.event-card-horizontal {
+
+        grid-template-columns: 1fr;
+
+        min-height: 0;
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-poster {
+
+        height: auto;
+
+        min-height: 0;
+
+        aspect-ratio: 4 / 3;
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-poster img {
+
+        object-fit: cover;
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-card-content {
+
+        min-height: 0;
+
+        padding:
+            24px
+            22px
+            26px;
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-card-content h3 {
+
+        font-size:
+            clamp(
+                28px,
+                9vw,
+                40px
+            );
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-card-action {
+
+        width: 100%;
+
+        margin-top: 20px;
+
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .public-event-card.event-card-horizontal
+    .event-poster img,
+
+    .public-event-card.event-card-horizontal
+    .event-poster::after,
+
+    .public-event-card.event-card-horizontal
+    .event-register-button {
+
+        transition: none;
+
+    }
+
+
+    .public-event-card.event-card-horizontal
+    .event-poster.poster-pressed
+    img {
+
+        animation: none;
+
+    }
+
+}
+/* =========================================================
+   SYNTHENOVA EVENT POSTER — POP EFFECT
+   Paste this entire block at the bottom of styles.css
+========================================================= */
+
+
+/* =========================================================
+   POSTER BASE
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster {
+
+    position: relative;
+
+    z-index: 1;
+
+    overflow: hidden;
+
+    cursor: pointer;
+
+    isolation: isolate;
+
+    transform-origin: center center;
+
+}
+
+
+/* =========================================================
+   POSTER IMAGE
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster img {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transform: scale(1);
+
+    transition:
+        transform 0.25s
+        cubic-bezier(.16, 1, .3, 1),
+        filter 0.25s ease;
+
+    will-change: transform;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
+
+}
+
+
+/* =========================================================
+   HOVER — VERY SMALL ZOOM
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster:hover img {
+
+    transform: scale(1.035);
+
+}
+
+
+/* =========================================================
+   CLICK / PRESS — BIG POP
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster.poster-pressed {
+
+    z-index: 20;
+
+    animation:
+        eventPosterPop
+        0.55s
+        cubic-bezier(.16, 1, .3, 1);
+
+}
+
+
+/* =========================================================
+   POP ANIMATION
+========================================================= */
+
+@keyframes eventPosterPop {
+
+    0% {
+
+        transform:
+            scale(1);
+
+    }
+
+    25% {
+
+        transform:
+            scale(1.10);
+
+    }
+
+    45% {
+
+        transform:
+            scale(1.06);
+
+    }
+
+    65% {
+
+        transform:
+            scale(1.075);
+
+    }
+
+    100% {
+
+        transform:
+            scale(1);
+
+    }
+
+}
+
+
+/* =========================================================
+   IMAGE POP
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster.poster-pressed img {
+
+    transform:
+        scale(1.08);
+
+    filter:
+        brightness(1.10)
+        contrast(1.04);
+
+}
+
+
+/* =========================================================
+   LITTLE LIGHT FLASH DURING POP
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster.poster-pressed::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 5;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255,255,255,0.20),
+            transparent 55%
+        );
+
+    animation:
+        posterPopLight
+        0.55s
+        ease-out;
+
+}
+
+
+/* =========================================================
+   LIGHT FLASH ANIMATION
+========================================================= */
+
+@keyframes posterPopLight {
+
+    0% {
+
+        opacity: 0;
+
+    }
+
+    25% {
+
+        opacity: 1;
+
+    }
+
+    60% {
+
+        opacity: 0.35;
+
+    }
+
+    100% {
+
+        opacity: 0;
+
+    }
+
+}
+
+
+/* =========================================================
+   VIEW LABEL
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster::after {
+
+    content: "VIEW";
+
+    position: absolute;
+
+    left: 18px;
+
+    bottom: 18px;
+
+    z-index: 10;
+
+    padding:
+        7px
+        11px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(7, 83, 80, 0.85);
+
+    color: #edf4f2;
+
+    font-family:
+        "DM Mono",
+        monospace;
+
+    font-size: 7px;
+
+    letter-spacing: 0.14em;
+
+    opacity: 0;
+
+    transform:
+        translateY(6px);
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+
+    pointer-events: none;
+
+}
+
+
+/* =========================================================
+   SHOW VIEW ON HOVER
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster:hover::after {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* =========================================================
+   HIDE VIEW DURING POP
+========================================================= */
+
+.public-event-card.event-card-horizontal
+.event-poster.poster-pressed::after {
+
+    opacity: 0;
+
+}
+
+
+/* =========================================================
+   MOBILE TOUCH
+========================================================= */
+
+@media (max-width: 760px) {
+
+    .public-event-card.event-card-horizontal
+    .event-poster {
+
+        cursor: pointer;
+
+        -webkit-tap-highlight-color:
+            transparent;
+
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .public-event-card.event-card-horizontal
+    .event-poster,
+
+    .public-event-card.event-card-horizontal
+    .event-poster img,
+
+    .public-event-card.event-card-horizontal
+    .event-poster::after {
+
+        transition: none;
+
+        animation: none;
+
+    }
+
+}

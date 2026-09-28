@@ -3132,101 +3132,241 @@ UNABLE TO LOAD EVENTS.
 }
 /* =========================================================
 CREATE PUBLIC EVENT CARD
+HORIZONTAL EVENT LAYOUT
 ========================================================= */
+
 function createPublicEventCard(
 eventData
 ) {
-const card =
-document.createElement(
-"article"
-);
-card.className =
-"event-card";
-const poster =
-eventData.poster_url
-? `
-<div class="event-poster">
-<img
-src="${escapeHTML(
-eventData.poster_url
-)}"
-alt="${escapeHTML(
-eventData.title ||
-"SYNTHENOVA event"
-)}"
-loading="lazy"
->
-</div>
-`
-: `
-<div class="event-poster event-poster-placeholder">
-<span>
-SYNTHENOVA
-</span>
-</div>
-`;
-const registerButton =
-eventData.registration_url
-? `
-<a
-class="event-register-button"
-href="${escapeHTML(
-eventData.registration_url
-)}"
-rel="noopener noreferrer"
->
-REGISTER NOW
-<span>↗</span>
-</a>
-`
-: "";
-card.innerHTML = `
-${poster}
-<div class="event-card-content">
-${
-eventData.event_date
-? `
-<span class="event-date">
-${escapeHTML(
-formatEventDate(
-eventData.event_date
-)
-)}
-</span>
-`
-: ""
-}
-<h3>
-${escapeHTML(
-eventData.title ||
-"SYNTHENOVA EVENT"
-)}
-</h3>
-${
-eventData.description
-? `
-<p>
-${escapeHTML(
-eventData.description
-)}
-</p>
-`
-: ""
-}
-${
-registerButton
-? `
-<div class="event-card-action">
-${registerButton}
-</div>
-`
-: ""
-}
-</div>
-`;
-return card;
-}
-/* =========================================================
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+    card.className =
+        "public-event-card event-card-horizontal";
+
+
+    /* =====================================================
+       POSTER
+    ===================================================== */
+
+    const poster =
+        eventData.poster_url
+
+            ? `
+                <div
+                    class="event-poster"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Preview event poster"
+                >
+
+                    <img
+                        src="${escapeHTML(
+                            eventData.poster_url
+                        )}"
+                        alt="${escapeHTML(
+                            eventData.title ||
+                            "SYNTHENOVA event"
+                        )}"
+                        loading="lazy"
+                        decoding="async"
+                    >
+
+                </div>
+            `
+
+            : `
+                <div
+                    class="event-poster event-poster-placeholder"
+                >
+                    <span>
+                        SYNTHENOVA
+                    </span>
+                </div>
+            `;
+
+
+    /* =====================================================
+       REGISTER BUTTON
+    ===================================================== */
+
+    const registerButton =
+        eventData.registration_url
+
+            ? `
+                <a
+                    class="event-register-button"
+                    href="${escapeHTML(
+                        eventData.registration_url
+                    )}"
+                    rel="noopener noreferrer"
+                >
+
+                    REGISTER NOW
+
+                    <span>
+                        ↗
+                    </span>
+
+                </a>
+            `
+
+            : "";
+
+
+    /* =====================================================
+       CARD CONTENT
+    ===================================================== */
+
+    card.innerHTML = `
+
+        ${poster}
+
+
+        <div
+            class="event-card-content"
+        >
+
+            ${
+                eventData.event_date
+
+                    ? `
+                        <span
+                            class="event-date"
+                        >
+                            ${escapeHTML(
+                                formatEventDate(
+                                    eventData.event_date
+                                )
+                            )}
+                        </span>
+                    `
+
+                    : ""
+            }
+
+
+            <h3>
+                ${escapeHTML(
+                    eventData.title ||
+                    "SYNTHENOVA EVENT"
+                )}
+            </h3>
+
+
+            ${
+                eventData.description
+
+                    ? `
+                        <p>
+                            ${escapeHTML(
+                                eventData.description
+                            )}
+                        </p>
+                    `
+
+                    : ""
+            }
+
+
+            ${
+                registerButton
+
+                    ? `
+                        <div
+                            class="event-card-action"
+                        >
+                            ${registerButton}
+                        </div>
+                    `
+
+                    : ""
+            }
+
+        </div>
+
+    `;
+
+
+    /* =====================================================
+       POSTER CLICK ANIMATION
+    ===================================================== */
+
+    const posterElement =
+        card.querySelector(
+            ".event-poster"
+        );
+
+
+    if (
+        posterElement &&
+        eventData.poster_url
+    ) {
+
+        const animatePoster =
+            () => {
+
+                posterElement.classList.remove(
+                    "poster-pressed"
+                );
+
+                /*
+                 * Force browser to restart animation
+                 */
+                void posterElement.offsetWidth;
+
+                posterElement.classList.add(
+                    "poster-pressed"
+                );
+
+
+                window.setTimeout(
+                    () => {
+
+                        posterElement.classList.remove(
+                            "poster-pressed"
+                        );
+
+                    },
+                    550
+                );
+
+            };
+
+
+        posterElement.addEventListener(
+            "click",
+            animatePoster
+        );
+
+
+        posterElement.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+
+                    event.preventDefault();
+
+                    animatePoster();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    return card;
+
+}/* =========================================================
 GALLERY ADMIN SETUP
 ========================================================= */
 function setupGalleryAdmin() {
