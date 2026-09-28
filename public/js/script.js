@@ -5407,3 +5407,675 @@ console.log(
 "SYNTHENOVA frontend initialized successfully."
 );
 });
+/* =========================================================
+   SYNTHENOVA EVENT POSTER VIEWER
+   Paste this entire block at the VERY BOTTOM of script.js
+========================================================= */
+
+(function setupEventPosterViewer() {
+
+    /* =====================================================
+       CREATE VIEWER
+    ===================================================== */
+
+    if (!document.getElementById("eventPosterViewer")) {
+
+        const viewer =
+            document.createElement("div");
+
+        viewer.id =
+            "eventPosterViewer";
+
+        viewer.className =
+            "event-poster-viewer";
+
+        viewer.innerHTML = `
+
+            <button
+                type="button"
+                class="event-poster-viewer-close"
+                id="eventPosterViewerClose"
+                aria-label="Close poster viewer"
+            >
+                ×
+            </button>
+
+            <div
+                class="event-poster-viewer-content"
+            >
+
+                <img
+                    id="eventPosterViewerImage"
+                    src=""
+                    alt="Event poster"
+                >
+
+                <div
+                    class="event-poster-viewer-info"
+                >
+                    <span
+                        id="eventPosterViewerLabel"
+                    >
+                        SYNTHENOVA / EVENT
+                    </span>
+
+                    <strong
+                        id="eventPosterViewerTitle"
+                    >
+                    </strong>
+                </div>
+
+            </div>
+
+        `;
+
+        document.body.appendChild(viewer);
+
+
+        /* =================================================
+           VIEWER CSS
+        ================================================= */
+
+        const style =
+            document.createElement("style");
+
+        style.id =
+            "eventPosterViewerStyles";
+
+        style.textContent = `
+
+            /* =============================================
+               EVENT POSTER VIEWER
+            ============================================= */
+
+            .event-poster-viewer {
+
+                position: fixed;
+
+                inset: 0;
+
+                z-index: 99999;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                padding: 30px;
+
+                background:
+                    rgba(2, 30, 29, 0.88);
+
+                backdrop-filter:
+                    blur(12px);
+
+                -webkit-backdrop-filter:
+                    blur(12px);
+
+                opacity: 0;
+
+                visibility: hidden;
+
+                pointer-events: none;
+
+                transition:
+                    opacity 0.28s ease,
+                    visibility 0.28s ease;
+
+            }
+
+
+            .event-poster-viewer.active {
+
+                opacity: 1;
+
+                visibility: visible;
+
+                pointer-events: auto;
+
+            }
+
+
+            /* =============================================
+               VIEWER CONTENT
+            ============================================= */
+
+            .event-poster-viewer-content {
+
+                position: relative;
+
+                max-width: min(
+                    620px,
+                    90vw
+                );
+
+                max-height: 90vh;
+
+                display: flex;
+
+                flex-direction: column;
+
+                align-items: center;
+
+                justify-content: center;
+
+                transform:
+                    scale(0.82);
+
+                opacity: 0;
+
+                transition:
+                    transform 0.42s
+                    cubic-bezier(
+                        .16,
+                        1,
+                        .3,
+                        1
+                    ),
+                    opacity 0.25s ease;
+
+            }
+
+
+            .event-poster-viewer.active
+            .event-poster-viewer-content {
+
+                transform:
+                    scale(1);
+
+                opacity: 1;
+
+            }
+
+
+            /* =============================================
+               POSTER IMAGE
+            ============================================= */
+
+            .event-poster-viewer-content img {
+
+                display: block;
+
+                width: auto;
+
+                max-width: 90vw;
+
+                max-height: 78vh;
+
+                object-fit: contain;
+
+                border-radius: 16px;
+
+                box-shadow:
+                    0 30px 80px
+                    rgba(0,0,0,0.45);
+
+                background:
+                    #d6e5e1;
+
+            }
+
+
+            /* =============================================
+               CLOSE BUTTON
+            ============================================= */
+
+            .event-poster-viewer-close {
+
+                position: fixed;
+
+                top: 25px;
+
+                right: 25px;
+
+                z-index: 100000;
+
+                width: 48px;
+
+                height: 48px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                border: 0;
+
+                border-radius: 50%;
+
+                background:
+                    rgba(
+                        237,
+                        244,
+                        242,
+                        0.12
+                    );
+
+                color: #edf4f2;
+
+                font-size: 30px;
+
+                line-height: 1;
+
+                cursor: pointer;
+
+                transition:
+                    background 0.2s ease,
+                    transform 0.2s ease;
+
+            }
+
+
+            .event-poster-viewer-close:hover {
+
+                background:
+                    rgba(
+                        237,
+                        244,
+                        242,
+                        0.22
+                    );
+
+                transform:
+                    rotate(90deg)
+                    scale(1.05);
+
+            }
+
+
+            /* =============================================
+               VIEWER INFO
+            ============================================= */
+
+            .event-poster-viewer-info {
+
+                width: 100%;
+
+                margin-top: 14px;
+
+                text-align: center;
+
+                color: #edf4f2;
+
+            }
+
+
+            .event-poster-viewer-info span {
+
+                display: block;
+
+                margin-bottom: 5px;
+
+                font-family:
+                    "DM Mono",
+                    monospace;
+
+                font-size: 8px;
+
+                letter-spacing:
+                    0.14em;
+
+                opacity: 0.55;
+
+            }
+
+
+            .event-poster-viewer-info strong {
+
+                display: block;
+
+                font-family:
+                    "Space Grotesk",
+                    sans-serif;
+
+                font-size: 15px;
+
+                font-weight: 600;
+
+            }
+
+
+            /* =============================================
+               MOBILE
+            ============================================= */
+
+            @media (max-width: 700px) {
+
+                .event-poster-viewer {
+
+                    padding: 18px;
+
+                }
+
+
+                .event-poster-viewer-content img {
+
+                    max-width: 92vw;
+
+                    max-height: 78vh;
+
+                    border-radius: 12px;
+
+                }
+
+
+                .event-poster-viewer-close {
+
+                    top: 15px;
+
+                    right: 15px;
+
+                    width: 42px;
+
+                    height: 42px;
+
+                    font-size: 27px;
+
+                }
+
+            }
+
+
+            /* =============================================
+               REDUCED MOTION
+            ============================================= */
+
+            @media (
+                prefers-reduced-motion: reduce
+            ) {
+
+                .event-poster-viewer,
+                .event-poster-viewer-content,
+                .event-poster-viewer-close {
+
+                    transition: none;
+
+                }
+
+            }
+
+        `;
+
+        document.head.appendChild(style);
+
+    }
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    const viewer =
+        document.getElementById(
+            "eventPosterViewer"
+        );
+
+    const viewerImage =
+        document.getElementById(
+            "eventPosterViewerImage"
+        );
+
+    const viewerTitle =
+        document.getElementById(
+            "eventPosterViewerTitle"
+        );
+
+    const closeButton =
+        document.getElementById(
+            "eventPosterViewerClose"
+        );
+
+
+    if (!viewer || !viewerImage) {
+        return;
+    }
+
+
+    /* =====================================================
+       OPEN VIEWER
+    ===================================================== */
+
+    function openEventPosterViewer(
+        poster
+    ) {
+
+        const image =
+            poster.querySelector("img");
+
+        if (!image) {
+            return;
+        }
+
+
+        /* Set image */
+
+        viewerImage.src =
+            image.currentSrc ||
+            image.src;
+
+        viewerImage.alt =
+            image.alt ||
+            "SYNTHENOVA event poster";
+
+
+        /* Get title from event card */
+
+        const card =
+            poster.closest(
+                ".event-card"
+            ) ||
+            poster.closest(
+                ".public-event-card"
+            );
+
+
+        const title =
+            card?.querySelector(
+                ".event-card-content h3"
+            );
+
+
+        if (viewerTitle) {
+
+            viewerTitle.textContent =
+                title?.textContent?.trim() ||
+                "SYNTHENOVA EVENT";
+
+        }
+
+
+        /* Show */
+
+        viewer.classList.add(
+            "active"
+        );
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE VIEWER
+    ===================================================== */
+
+    function closeEventPosterViewer() {
+
+        viewer.classList.remove(
+            "active"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+
+        window.setTimeout(
+            () => {
+
+                if (
+                    !viewer.classList.contains(
+                        "active"
+                    )
+                ) {
+
+                    viewerImage.src = "";
+
+                }
+
+            },
+            300
+        );
+
+    }
+
+
+    /* =====================================================
+       CLICK POSTER / VIEW
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            const poster =
+                event.target.closest(
+                    ".event-poster"
+                );
+
+
+            if (!poster) {
+                return;
+            }
+
+
+            /*
+             * Don't open placeholder posters
+             */
+
+            const image =
+                poster.querySelector("img");
+
+
+            if (!image) {
+                return;
+            }
+
+
+            /*
+             * Open viewer
+             */
+
+            openEventPosterViewer(
+                poster
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       CLOSE BUTTON
+    ===================================================== */
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                closeEventPosterViewer();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       CLICK OUTSIDE IMAGE
+    ===================================================== */
+
+    viewer.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === viewer
+            ) {
+
+                closeEventPosterViewer();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                viewer.classList.contains(
+                    "active"
+                )
+            ) {
+
+                closeEventPosterViewer();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       KEYBOARD ACCESS
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            const poster =
+                event.target.closest?.(
+                    ".event-poster"
+                );
+
+
+            if (!poster) {
+                return;
+            }
+
+
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+
+                event.preventDefault();
+
+                openEventPosterViewer(
+                    poster
+                );
+
+            }
+
+        }
+    );
+
+})();
