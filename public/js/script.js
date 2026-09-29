@@ -6079,3 +6079,469 @@ console.log(
     );
 
 })();
+/* =========================================================
+   SYNTHENOVA — JOIN COMMUNITY BUTTON FIX
+   Paste this entire block at the VERY BOTTOM of script.js
+========================================================= */
+
+(function setupSynthenovaJoinButtons() {
+
+    function getElement(id) {
+        return document.getElementById(id);
+    }
+
+
+    /* =====================================================
+       OPEN JOIN MODAL
+    ===================================================== */
+
+    function openJoinModal() {
+
+        const modal =
+            getElement("joinModal");
+
+        if (!modal) {
+
+            console.error(
+                "SYNTHENOVA: joinModal not found."
+            );
+
+            return;
+
+        }
+
+
+        modal.classList.add("active");
+
+        modal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+
+        /* Focus name field */
+
+        window.setTimeout(() => {
+
+            const nameInput =
+                getElement("memberName");
+
+            if (nameInput) {
+
+                nameInput.focus();
+
+            }
+
+        }, 250);
+
+    }
+
+
+    /* =====================================================
+       CLOSE JOIN MODAL
+    ===================================================== */
+
+    function closeJoinModal() {
+
+        const modal =
+            getElement("joinModal");
+
+        if (!modal) {
+            return;
+        }
+
+
+        modal.classList.remove(
+            "active"
+        );
+
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+    }
+
+
+    /* =====================================================
+       HERO + CONTACT BUTTONS
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            const joinButton =
+                event.target.closest(
+                    "#joinButton"
+                );
+
+            const contactJoinButton =
+                event.target.closest(
+                    "#contactJoinButton"
+                );
+
+
+            /* HERO JOIN COMMUNITY */
+
+            if (joinButton) {
+
+                event.preventDefault();
+
+                openJoinModal();
+
+                return;
+
+            }
+
+
+            /* CONTACT JOIN SYNTHENOVA */
+
+            if (contactJoinButton) {
+
+                event.preventDefault();
+
+                openJoinModal();
+
+                return;
+
+            }
+
+
+            /* CLOSE BUTTON */
+
+            const closeButton =
+                event.target.closest(
+                    "#closeJoinModal"
+                );
+
+            if (closeButton) {
+
+                event.preventDefault();
+
+                closeJoinModal();
+
+                return;
+
+            }
+
+
+            /* CLICK OUTSIDE MODAL */
+
+            const modal =
+                getElement("joinModal");
+
+            if (
+                modal &&
+                event.target === modal
+            ) {
+
+                closeJoinModal();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       JOIN FORM
+    ===================================================== */
+
+    document.addEventListener(
+        "submit",
+        function(event) {
+
+            const form =
+                event.target.closest(
+                    "#joinForm"
+                );
+
+
+            if (!form) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            const nameInput =
+                getElement("memberName");
+
+            const departmentInput =
+                getElement("department");
+
+            const message =
+                getElement("formMessage");
+
+
+            const name =
+                nameInput?.value.trim() ||
+                "";
+
+            const department =
+                departmentInput?.value ||
+                "";
+
+
+            /* =============================================
+               VALIDATION
+            ============================================= */
+
+            if (
+                !name ||
+                !department
+            ) {
+
+                if (message) {
+
+                    message.textContent =
+                        "PLEASE COMPLETE ALL FIELDS.";
+
+                    message.classList.add(
+                        "error"
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            /* =============================================
+               SUCCESS MESSAGE
+            ============================================= */
+
+            if (message) {
+
+                message.classList.remove(
+                    "error"
+                );
+
+                message.textContent =
+                    "REDIRECTING TO COMMUNITY...";
+
+            }
+
+
+            /* =============================================
+               COMMUNITY LINK
+            ============================================= */
+
+            const communityURL =
+                "https://chat.whatsapp.com/By96SMw1a56GRiAwx9b574?s=sw&p=a&mlu=4&ilr=4";
+
+
+            /* =============================================
+               REDIRECT
+            ============================================= */
+
+            window.setTimeout(
+                () => {
+
+                    window.location.href =
+                        communityURL;
+
+                },
+                500
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key !== "Escape"
+            ) {
+                return;
+            }
+
+
+            const modal =
+                getElement("joinModal");
+
+
+            if (
+                modal &&
+                modal.classList.contains(
+                    "active"
+                )
+            ) {
+
+                closeJoinModal();
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       SAFETY — MAKE SURE MODAL STARTS CLOSED
+    ===================================================== */
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            const modal =
+                getElement("joinModal");
+
+
+            if (!modal) {
+                return;
+            }
+
+
+            modal.classList.remove(
+                "active"
+            );
+
+            modal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+        }
+    );
+
+})();
+/* =========================================================
+   SYNTHENOVA — FAST LOADING FIX
+   Paste at the VERY BOTTOM of script.js
+========================================================= */
+
+(function fastLoadingFix() {
+
+    "use strict";
+
+
+    /* =====================================================
+       FORCE PAGE VISIBLE
+    ===================================================== */
+
+    function forcePageReady() {
+
+        const loader =
+            document.getElementById(
+                "pageLoader"
+            );
+
+        if (!loader) {
+            return;
+        }
+
+
+        loader.classList.add(
+            "hidden"
+        );
+
+
+        window.setTimeout(
+            () => {
+
+                loader.style.display =
+                    "none";
+
+            },
+            450
+        );
+
+    }
+
+
+    /* =====================================================
+       DON'T LET LOADER BLOCK THE SITE
+    ===================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                /*
+                 * Give the browser one frame
+                 * to paint the actual website.
+                 */
+
+                requestAnimationFrame(
+                    () => {
+
+                        requestAnimationFrame(
+                            () => {
+
+                                forcePageReady();
+
+                            }
+                        );
+
+                    }
+                );
+
+            },
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        requestAnimationFrame(
+            forcePageReady
+        );
+
+    }
+
+
+    /* =====================================================
+       ABSOLUTE SAFETY TIMEOUT
+    ===================================================== */
+
+    window.setTimeout(
+        forcePageReady,
+        1800
+    );
+
+
+    /* =====================================================
+       WINDOW LOAD FALLBACK
+    ===================================================== */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            forcePageReady();
+
+        },
+        {
+            once: true
+        }
+    );
+
+
+})();
